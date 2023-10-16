@@ -81,7 +81,10 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
              'drift_detection_method_hp': {'beta_pht': 0.25, 'delta_pht': 0.825, 'lambda_pht': 0.01},
              },
             {'drift_detection_method': 'HT',
-             'drift_detection_method_hp': {'ht_threshold': 1},
+             'drift_detection_method_hp': {'ht_threshold': 2},
+             },
+            {'drift_detection_method': 'PST',
+             'drift_detection_method_hp': {'posterior_threshold': 0.015},
              },
         ]
         values = list(range(50))

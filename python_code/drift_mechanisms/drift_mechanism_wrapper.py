@@ -48,7 +48,7 @@ class DRIFT_TYPES(Enum):
     DDM = 'DDM'
     PHT = 'PHT'
     HT = 'HT'
-    TEST = 'TEST'
+    PST = 'PST'
 
 
 class DriftDetectionDriven:
@@ -57,7 +57,7 @@ class DriftDetectionDriven:
             DRIFT_TYPES.DDM.name: DriftDDM,
             DRIFT_TYPES.PHT.name: DriftPHT,
             DRIFT_TYPES.HT.name: DriftHT,
-            DRIFT_TYPES.TEST.name: DriftPosterior
+            DRIFT_TYPES.PST.name: DriftPosterior
         }
         self.drift_detector = DATA_DRIVEN_DRIFT_DETECTORS_DICT[conf.drift_detection_method]
         if conf.drift_detection_method == DRIFT_TYPES.DDM.name:
@@ -69,7 +69,7 @@ class DriftDetectionDriven:
                                                       lambda_value=conf.drift_detection_method_hp['lambda_pht'])
         elif conf.drift_detection_method == DRIFT_TYPES.HT.name:
             self.drift_detector = self.drift_detector(threshold=conf.drift_detection_method_hp['ht_threshold'])
-        elif conf.drift_detection_method == DRIFT_TYPES.TEST.name:
+        elif conf.drift_detection_method == DRIFT_TYPES.PST.name:
             self.drift_detector = self.drift_detector(threshold=conf.drift_detection_method_hp['posterior_threshold'])
 
     def is_train(self, user: int, **kwargs: Dict):
@@ -79,8 +79,8 @@ class DriftDetectionDriven:
             return self.drift_detector.check_drift(kwargs['rx'][:, user])
         elif conf.drift_detection_method == DRIFT_TYPES.HT.name:
             return self.drift_detector.check_drift(kwargs['ht'][user])
-        elif conf.drift_detection_method == DRIFT_TYPES.TEST.name:
-            return self.drift_detector.check_drift(kwargs['tx_pilot'][:, user],kwargs['probs_vec'][:, user])
+        elif conf.drift_detection_method == DRIFT_TYPES.PST.name:
+            return self.drift_detector.check_drift(kwargs['tx_pilot'][:, user], kwargs['probs_vec'][:, user])
         else:
             raise ValueError('Drift detection method not recognized!!!')
 

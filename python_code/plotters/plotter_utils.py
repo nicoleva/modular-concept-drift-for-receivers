@@ -52,6 +52,8 @@ def get_marker(method_name: str) -> str:
         return 'x'
     elif 'HT' in method_name:
         return 'P'
+    elif 'PST' in method_name:
+        return 'P'
     else:
         raise ValueError('No such method!!!')
 
@@ -69,6 +71,8 @@ def get_color(method_name: str) -> str:
         return 'chocolate'
     elif 'HT' in method_name:
         return 'orange'
+    elif 'PST' in method_name:
+        return 'pink'
     else:
         raise ValueError('No such method!!!')
 
