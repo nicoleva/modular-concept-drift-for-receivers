@@ -149,9 +149,10 @@ class Trainer(object):
             # calculate accuracy
             ber = calculate_ber(detected_word, tx_data[:, :rx.shape[1]])
             print(f'current: {block_ind, ber}')
-            detected_pilot = self.forward_pilot(rx_pilot, tx_pilot)
+            detected_pilot, probs_vec = self.forward_pilot(rx_pilot, tx_pilot)
             error_rate = calculate_error_rate(detected_pilot, tx_pilot[:, :rx.shape[1]])
-            kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht}
+            kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht,
+                      'tx_pilot': tx_pilot,'probs_vec':probs_vec}
             total_ber.append(ber)
 
         print(f'Final ser: {sum(total_ber) / len(total_ber)}, Total Re-trains: {sum(block_idn_train)}')

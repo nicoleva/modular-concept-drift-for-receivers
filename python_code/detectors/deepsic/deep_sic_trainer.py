@@ -139,7 +139,7 @@ class DeepSICTrainer(Trainer):
         if np.prod(np.shape(ht_mat[self.n_user - 1][ITERATIONS - 1])) != 0:
             self.ht = [row[ITERATIONS - 1] for row in ht_mat]
         detected_word = BPSKModulator.demodulate(prob_to_BPSK_symbol(self.pilots_probs_vec.float()))
-        return detected_word
+        return detected_word, self.pilots_probs_vec
 
     def prepare_data_for_training(self, tx: torch.Tensor, rx: torch.Tensor, probs_vec: torch.Tensor) -> [
         torch.Tensor, torch.Tensor]:

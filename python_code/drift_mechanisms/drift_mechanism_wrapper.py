@@ -5,6 +5,7 @@ from python_code.channel.channels_hyperparams import N_USER
 from python_code.drift_mechanisms.ddm import DriftDDM
 from python_code.drift_mechanisms.ht import DriftHT
 from python_code.drift_mechanisms.pht import DriftPHT
+from python_code.drift_mechanisms.posterior import DriftPosterior
 from python_code.utils.config_singleton import Config
 from python_code.utils.constants import ChannelModes
 
@@ -47,6 +48,7 @@ class DRIFT_TYPES(Enum):
     DDM = 'DDM'
     PHT = 'PHT'
     HT = 'HT'
+    TEST = 'TEST'
 
 
 class DriftDetectionDriven:
@@ -54,7 +56,8 @@ class DriftDetectionDriven:
         DATA_DRIVEN_DRIFT_DETECTORS_DICT = {
             DRIFT_TYPES.DDM.name: DriftDDM,
             DRIFT_TYPES.PHT.name: DriftPHT,
-            DRIFT_TYPES.HT.name: DriftHT
+            DRIFT_TYPES.HT.name: DriftHT,
+            DRIFT_TYPES.TEST.name: DriftPosterior
         }
         self.drift_detector = DATA_DRIVEN_DRIFT_DETECTORS_DICT[conf.drift_detection_method]
         if conf.drift_detection_method == DRIFT_TYPES.DDM.name:
@@ -66,6 +69,8 @@ class DriftDetectionDriven:
                                                       lambda_value=conf.drift_detection_method_hp['lambda_pht'])
         elif conf.drift_detection_method == DRIFT_TYPES.HT.name:
             self.drift_detector = self.drift_detector(threshold=conf.drift_detection_method_hp['ht_threshold'])
+        elif conf.drift_detection_method == DRIFT_TYPES.TEST.name:
+            self.drift_detector = self.drift_detector(threshold=conf.drift_detection_method_hp['posterior_threshold'])
 
     def is_train(self, user: int, **kwargs: Dict):
         if conf.drift_detection_method == DRIFT_TYPES.DDM.name:
@@ -74,6 +79,8 @@ class DriftDetectionDriven:
             return self.drift_detector.check_drift(kwargs['rx'][:, user])
         elif conf.drift_detection_method == DRIFT_TYPES.HT.name:
             return self.drift_detector.check_drift(kwargs['ht'][user])
+        elif conf.drift_detection_method == DRIFT_TYPES.TEST.name:
+            return self.drift_detector.check_drift(kwargs['tx_pilot'][:, user],kwargs['probs_vec'][:, user])
         else:
             raise ValueError('Drift detection method not recognized!!!')
 
