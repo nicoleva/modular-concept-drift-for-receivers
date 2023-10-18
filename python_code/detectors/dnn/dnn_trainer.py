@@ -105,7 +105,7 @@ class DNNTrainer(Trainer):
             self.ht = ht_mat
         estimated_states = torch.argmax(soft_estimation, dim=1)
         detected_word = calculate_symbols_from_states(self.n_ant, estimated_states).long()
-        return detected_word
+        return detected_word, probs_per_symbol
 
     def calculate_prob_per_symbol(self, soft_estimation):
         first_user_logits = torch.sum(soft_estimation[:, 1::2], keepdim=True, dim=1)

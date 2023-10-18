@@ -101,7 +101,7 @@ class Trainer(object):
         """
         Every trainer must have some forward pass for its detector
         """
-        return self.forward(rx_pilot)
+        return self.forward(rx_pilot), None
 
     def init_priors(self):
         """
@@ -152,7 +152,7 @@ class Trainer(object):
             detected_pilot, probs_vec = self.forward_pilot(rx_pilot, tx_pilot)
             error_rate = calculate_error_rate(detected_pilot, tx_pilot[:, :rx.shape[1]])
             kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht,
-                      'tx_pilot': tx_pilot,'probs_vec':probs_vec}
+                      'tx_pilot': tx_pilot, 'probs_vec': probs_vec}
             total_ber.append(ber)
 
         print(f'Final ser: {sum(total_ber) / len(total_ber)}, Total Re-trains: {sum(block_idn_train)}')
