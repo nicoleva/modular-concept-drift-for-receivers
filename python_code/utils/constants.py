@@ -9,7 +9,7 @@ class ChannelModes(Enum):
 
 
 class ChannelModels(Enum):
-    Cost2100 = 'Cost2100'
+    DistortedMIMO = 'DistortedMIMO'
 
 
 class DetectorType(Enum):

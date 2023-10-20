@@ -13,8 +13,8 @@ class DriftPosterior:
         threshold_1 = self.calc_threshold(vec_1)
         total_threshold = (vec_0.shape[0] * threshold_0 + vec_1.shape[0] * threshold_1) / probs_vec.shape[0]
         if total_threshold > self.threshold:
-            return 1
-        return 0
+            return True
+        return False
 
     def calc_threshold(self, s_probs_vec):
         mu = s_probs_vec.mean()

@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 from numpy.random import default_rng
 
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
-from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel
+from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMIMOChannel
 from python_code.channel.modulator import BPSKModulator
 from python_code.utils.config_singleton import Config
 from python_code.utils.constants import ChannelModels
@@ -22,12 +22,12 @@ mpl.rcParams['axes.titlesize'] = 28
 mpl.rcParams['axes.labelsize'] = 28
 mpl.rcParams['lines.linewidth'] = 2
 mpl.rcParams['lines.markersize'] = 8
-mpl.rcParams['legend.fontsize'] = 18* R
+mpl.rcParams['legend.fontsize'] = 18 * R
 mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['font.family'] = 'STIXGeneral'
 conf = Config()
 
-MIMO_CHANNELS_DICT = {ChannelModels.Cost2100.name: Cost2100MIMOChannel}
+MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel}
 
 
 class MIMOChannel:
@@ -38,6 +38,7 @@ class MIMOChannel:
         self.tx_length = N_USER
         self.h_shape = [N_ANT, N_USER]
         self.rx_length = N_ANT
+        self.h = DistortedMIMOChannel()
 
     def _transmit(self, h: np.ndarray, snr: float) -> Tuple[np.ndarray, np.ndarray]:
         tx_pilots = self._bits_generator.integers(0, BPSKModulator.constellation_size,
@@ -53,8 +54,8 @@ class MIMOChannel:
 
     def get_vectors(self, snr: float, index: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         # get channel values
-        if conf.channel_model == ChannelModels.Cost2100.name:
-            h = Cost2100MIMOChannel.calculate_channel(N_ANT, N_USER, index, conf.fading_in_channel)
+        if conf.channel_model == ChannelModels.DistortedMIMO.name:
+            h = self.h.calculate_channel(N_USER, index)
         else:
             raise ValueError("No such channel model!!!")
         tx, rx = self._transmit(h, snr)
@@ -77,7 +78,7 @@ if __name__ == "__main__":
         current_axis.grid(True, which='both')
         current_axis.set_ylim([0, 1])
         current_axis.set_ylabel(f'Ant. {j + 1}')
-    fig.supxlabel(r'Block Index',fontsize=28* R)
-    fig.supylabel(r'Magnitude',fontsize=28* R)
+    fig.supxlabel(r'Block Index', fontsize=28 * R)
+    fig.supylabel(r'Magnitude', fontsize=28 * R)
     axs[3].legend(loc='lower right')
     plt.show()

@@ -25,11 +25,16 @@ class DriftMechanismWrapper:
         self.drift_mechanism_list = [DRIFT_MECHANISMS_DICT[mechanism_type]() for _ in range(self.n_users)]
 
     def is_train(self, kwargs: Dict):
+        for user in range(N_USER):
+            if self.is_train_user(user, kwargs):
+                return True
+        return False
+
+    def is_train_user(self, user: int, kwargs: Dict):
         if kwargs['block_ind'] == -1:
             return True
-        for user, drift_mechanism in enumerate(self.drift_mechanism_list):
-            if drift_mechanism.is_train(user=user, **kwargs):
-                return True
+        if self.drift_mechanism_list[user].is_train(user=user, **kwargs):
+            return True
         return False
 
 
@@ -86,7 +91,7 @@ class DriftDetectionDriven:
 
 
 DRIFT_MECHANISMS_DICT = {
-    'always': AlwaysDriftMechanism,
-    'periodic': PeriodicMechanism,
-    'drift': DriftDetectionDriven
+    'ALWAYS': AlwaysDriftMechanism,
+    'PERIODIC': PeriodicMechanism,
+    'DRIFT': DriftDetectionDriven
 }

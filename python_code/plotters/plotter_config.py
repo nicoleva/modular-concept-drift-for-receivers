@@ -16,7 +16,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.model.name,
              'channel_type': ChannelModes.SISO.name,
-             'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
+             'blocks_num': 100, 'channel_model': ChannelModels.DistortedMIMO.name,
              'block_length': 10000, 'pilot_size': 2000, 'drift_detection_method': None,
              'drift_detection_method_hp': None}
         ]
@@ -40,7 +40,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.black_box.name,
              'channel_type': ChannelModes.SISO.name,
-             'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
+             'blocks_num': 100, 'channel_model': ChannelModels.DistortedMIMO.name,
              'block_length': 10000, 'pilot_size': 2000, 'drift_detection_method': None,
              'drift_detection_method_hp': None}
         ]
@@ -69,7 +69,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.model.name,
              'channel_type': ChannelModes.MIMO.name,
-             'blocks_num': 50, 'channel_model': ChannelModels.Cost2100.name,
+             'blocks_num': 50, 'channel_model': ChannelModels.DistortedMIMO.name,
              'block_length': 10000, 'pilot_size': 1000, 'drift_detection_method': None,
              'drift_detection_method_hp': None}
         ]
@@ -99,7 +99,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.black_box.name,
              'channel_type': ChannelModes.MIMO.name,
-             'blocks_num': 50, 'channel_model': ChannelModels.Cost2100.name,
+             'blocks_num': 50, 'channel_model': ChannelModels.DistortedMIMO.name,
              'block_length': 10000, 'pilot_size': 2000, 'drift_detection_method': None,
              'drift_detection_method_hp': None}
         ]

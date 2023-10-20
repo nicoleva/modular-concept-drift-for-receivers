@@ -11,7 +11,7 @@ from python_code.channel.channel_dataset import ChannelModelDataset
 from python_code.channel.channels_hyperparams import N_USER
 from python_code.drift_mechanisms.drift_mechanism_wrapper import DriftMechanismWrapper, TRAINING_TYPES
 from python_code.utils.config_singleton import Config
-from python_code.utils.constants import ChannelModes
+from python_code.utils.constants import ChannelModes, DetectorType
 from python_code.utils.metrics import calculate_ber, calculate_error_rate
 
 conf = Config()
@@ -136,14 +136,21 @@ class Trainer(object):
             # split words into data and pilot part
             tx_pilot, tx_data = tx[:conf.pilot_size], tx[conf.pilot_size:]
             rx_pilot, rx_data = rx[:conf.pilot_size], rx[conf.pilot_size:]
-            if (conf.is_online_training and drift_mechanism.is_train(kwargs)):
-                print('re-training')
-                if conf.channel_type in ChannelModes.MIMO.name and conf.mechanism == TRAINING_TYPES.DRIFT.name:
-                    for idx in range(N_USER):
-                        self.train_user[idx] = True
-                # re-train the detector
+            self.train_users_list = [False for _ in range(N_USER)]
+            if drift_mechanism.is_train(kwargs):
+                if conf.modular and conf.channel_type == ChannelModes.MIMO.name and \
+                        conf.detector_type == DetectorType.model.name:
+                    # modular per-user training
+                    self.modular_training(block_idn_train, block_ind, drift_mechanism, kwargs)
+                else:
+                    print('re-training')
+                    # all users training
+                    for user in range(N_USER):
+                        self.train_users_list[user] = True
+                    block_idn_train[block_ind] = 1
+                print(self.train_users_list)
                 self._online_training(tx_pilot, rx_pilot)
-                block_idn_train[block_ind] = 1
+
             # detect data part after training on the pilot part
             detected_word = self.forward(rx_data)
             # calculate accuracy
@@ -151,12 +158,19 @@ class Trainer(object):
             print(f'current: {block_ind, ber}')
             detected_pilot, probs_vec = self.forward_pilot(rx_pilot, tx_pilot)
             error_rate = calculate_error_rate(detected_pilot, tx_pilot[:, :rx.shape[1]])
-            kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht,
-                      'tx_pilot': tx_pilot, 'probs_vec': probs_vec}
+            kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht, 'tx_pilot': tx_pilot,
+                      'probs_vec': probs_vec}
             total_ber.append(ber)
 
         print(f'Final ser: {sum(total_ber) / len(total_ber)}, Total Re-trains: {sum(block_idn_train)}')
         return total_ber, block_idn_train
+
+    def modular_training(self, block_idn_train, block_ind, drift_mechanism, kwargs):
+        for user in range(N_USER):
+            if drift_mechanism.is_train_user(user, kwargs):
+                print(f're-training user {user}')
+                self.train_users_list[user] = True
+                block_idn_train[block_ind] += 1 / N_USER
 
     def run_train_loop(self, est: torch.Tensor, tx: torch.Tensor) -> float:
         # calculate loss

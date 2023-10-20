@@ -39,7 +39,6 @@ class DeepSICTrainer(Trainer):
         self.memory_length = 1
         self.n_user = N_USER
         self.n_ant = N_ANT
-        self.train_user = [True] * N_USER
         self.lr = 1e-3
         self.ht = [0] * N_USER
         self.prev_ht_s1 = [[[] for _ in range(ITERATIONS)] for _ in range(self.n_user)]
@@ -83,9 +82,12 @@ class DeepSICTrainer(Trainer):
 
     def train_models(self, model: List[List[DeepSICDetector]], i: int, tx_all: List[torch.Tensor],
                      rx_all: List[torch.Tensor]):
+
         for user in range(self.n_user):
-            if self.train_user[user]:
-                self.train_model(model[user][i], tx_all[user], rx_all[user])
+            if not self.train_users_list[user]:
+                continue
+            print(user)
+            self.train_model(model[user][i], tx_all[user], rx_all[user])
 
     def _online_training(self, tx: torch.Tensor, rx: torch.Tensor):
         """
