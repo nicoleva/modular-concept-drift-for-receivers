@@ -10,6 +10,8 @@ class ChannelModes(Enum):
 
 class ChannelModels(Enum):
     DistortedMIMO = 'DistortedMIMO'
+    OneUserDistortedMIMOChannel = 'OneUserDistortedMIMOChannel'
+    SEDChannel = 'SEDChannel'
 
 
 class DetectorType(Enum):

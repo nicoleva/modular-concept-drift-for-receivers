@@ -1,11 +1,11 @@
 # channel
 channel_type: 'MIMO' # Channel mechanism_type values: ['SISO','MIMO'].
-channel_model: 'DistortedMIMO' # Physical channel models: ['DistortedMIMO','Synthetic']
+channel_model: 'OneUserDistortedMIMOChannel' # Physical channel models: ['DistortedMIMO','SEDChannel']
 detector_type: 'model' # 'model' or 'black_box'
-snr: 14 # validation SNR value. values: float.
+snr: 12 # validation SNR value. values: float.
 
 # protocol
-block_length: 5500 # coherence block time, total size of pilot + data. values: int.
+block_length: 4500 # coherence block time, total size of pilot + data. values: int.
 pilot_size: 500 # pilot bits
 blocks_num: 100 # number of validation frames. values: int.
 
@@ -16,9 +16,9 @@ seed: 100 # run seed
 
 # concept drift mechanism
 mechanism: DRIFT # ['ALWAYS','DRIFT','PERIODIC']
-modular: True
+modular: False
 period: 10
 drift_detection_method: 'PST' # ['DDM','PHT','HT','PST']
 drift_detection_method_hp: { 'alpha_ddm': 8, 'beta_ddm': 0.25,
                              'beta_pht': 0.2, 'delta_pht': 1, 'lambda_pht': 0.1,
-                             'ht_threshold': 0.005, 'posterior_threshold': 0.94 }
+                             'ht_threshold': 0.005, 'posterior_threshold': 0.9 }

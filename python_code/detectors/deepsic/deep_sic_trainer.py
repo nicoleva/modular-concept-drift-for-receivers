@@ -9,6 +9,7 @@ from python_code.channel.channels_hyperparams import N_ANT, N_USER
 from python_code.channel.modulator import BPSKModulator
 from python_code.detectors.deepsic.deep_sic_detector import DeepSICDetector
 from python_code.detectors.trainer import Trainer
+from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
 from python_code.utils.config_singleton import Config
 from python_code.utils.constants import HALF
 from python_code.utils.hotelling_test_utils import run_hotelling_test
@@ -96,6 +97,8 @@ class DeepSICTrainer(Trainer):
         Main training function for DeepSIC trainer. Initializes the probabilities, then propagates them through the
         network, training sequentially each network and not by end-to-end manner (each one individually).
         """
+        if conf.mechanism == TRAINING_TYPES.DRIFT:
+            self._initialize_detector()
         initial_probs = tx.clone()
         tx_all, rx_all = self.prepare_data_for_training(tx, rx, initial_probs)
         # Training the DeepSIC network for each user for iteration=1

@@ -5,10 +5,10 @@ from python_code.utils.config_singleton import Config
 
 conf = Config()
 
-CHANNEL_FLIPS_EVERY = {0: 7, 1: 18, 2: 22, 3: 28}
-C = 1.5
+CHANNEL_FLIPS_EVERY = {0: 6, 1: 1000, 2: 1000, 3: 1000}
+C = 1.8
 
-class DistortedMIMOChannel:
+class OneUserDistortedMIMOChannel:
     def __init__(self):
         # Antennas (rows) X Users (columns)
         self.h = np.array([[0.8, 0.4, 0.2, 0.1],
@@ -31,7 +31,7 @@ class DistortedMIMOChannel:
         :param h: channel coefficients
         :return: received word
         """
-        conv = DistortedMIMOChannel._compute_channel_signal_convolution(h, s)
+        conv = OneUserDistortedMIMOChannel._compute_channel_signal_convolution(h, s)
         sigma = 10 ** (-0.1 * snr)
         w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
         y = conv + w

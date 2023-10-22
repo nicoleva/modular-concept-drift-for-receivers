@@ -7,6 +7,8 @@ from numpy.random import default_rng
 
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
 from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMIMOChannel
+from python_code.channel.mimo_channels.one_user_distorted_mimo_channel import OneUserDistortedMIMOChannel
+from python_code.channel.mimo_channels.sed_channel import SEDChannel
 from python_code.channel.modulator import BPSKModulator
 from python_code.utils.config_singleton import Config
 from python_code.utils.constants import ChannelModels
@@ -27,7 +29,9 @@ mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['font.family'] = 'STIXGeneral'
 conf = Config()
 
-MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel}
+MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel,
+                      ChannelModels.SEDChannel.name: SEDChannel,
+                      ChannelModels.OneUserDistortedMIMOChannel.name:OneUserDistortedMIMOChannel}
 
 
 class MIMOChannel:
@@ -38,7 +42,7 @@ class MIMOChannel:
         self.tx_length = N_USER
         self.h_shape = [N_ANT, N_USER]
         self.rx_length = N_ANT
-        self.h = DistortedMIMOChannel()
+        self.h = MIMO_CHANNELS_DICT[conf.channel_model]()
 
     def _transmit(self, h: np.ndarray, snr: float) -> Tuple[np.ndarray, np.ndarray]:
         tx_pilots = self._bits_generator.integers(0, BPSKModulator.constellation_size,
@@ -54,8 +58,11 @@ class MIMOChannel:
 
     def get_vectors(self, snr: float, index: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         # get channel values
-        if conf.channel_model == ChannelModels.DistortedMIMO.name:
+        if conf.channel_model == ChannelModels.DistortedMIMO.name or \
+                conf.channel_model == ChannelModels.OneUserDistortedMIMOChannel.name:
             h = self.h.calculate_channel(N_USER, index)
+        elif conf.channel_model == ChannelModels.SEDChannel.name:
+            h = self.h.calculate_channel(N_ANT, index)
         else:
             raise ValueError("No such channel model!!!")
         tx, rx = self._transmit(h, snr)
