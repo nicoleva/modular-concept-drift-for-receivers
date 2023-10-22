@@ -57,10 +57,7 @@ class VNETTrainer(Trainer):
         :param rx: received word
         :param h: channel coefficients
         """
-        if not conf.fading_in_channel:
-            self._initialize_detector()
         self.deep_learning_setup()
-
         # run training loops
         loss = 0
         for i in range(EPOCHS):

@@ -22,6 +22,7 @@ class DriftPHT:
         if self.previous_distance is None:
             self.previous_distance = distance
         distance_diff = abs(distance - self.previous_distance)
+        print(f'Threshold: {distance_diff}')
         if distance_diff != math.inf and distance_diff > self.lambda_value:
             self.mu_t_prev = samples_vector.mean()
             self.previous_distance = None

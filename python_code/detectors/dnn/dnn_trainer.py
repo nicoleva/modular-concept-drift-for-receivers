@@ -70,8 +70,6 @@ class DNNTrainer(Trainer):
         :param tx: transmitted word
         :param rx: received word
         """
-        if not conf.fading_in_channel:
-            self._initialize_detector()
         self.optimizer = torch.optim.Adam(self.detector.parameters(), lr=self.lr)
         self.criterion = torch.nn.CrossEntropyLoss()
         # run training loops

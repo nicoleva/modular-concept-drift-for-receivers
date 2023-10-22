@@ -57,10 +57,7 @@ class RNNTrainer(Trainer):
         :param tx: transmitted word
         :param rx: received word
         """
-        if not conf.fading_in_channel:
-            self._initialize_detector()
         self.deep_learning_setup()
-
         # run training loops
         loss = 0
         for i in range(EPOCHS):

@@ -2,13 +2,11 @@
 channel_type: 'MIMO' # Channel mechanism_type values: ['SISO','MIMO'].
 channel_model: 'DistortedMIMO' # Physical channel models: ['DistortedMIMO','Synthetic']
 detector_type: 'model' # 'model' or 'black_box'
-linear: True # channel linearity. Boolean value.
-fading_in_channel: False # If the channel is fading/non-fading. values: [True, False]
-snr: 12 # validation SNR value. values: float.
+snr: 14 # validation SNR value. values: float.
 
 # protocol
-block_length: 10000 # coherence block time, total size of pilot + data. values: int.
-pilot_size: 1000 # pilot bits
+block_length: 5500 # coherence block time, total size of pilot + data. values: int.
+pilot_size: 500 # pilot bits
 blocks_num: 100 # number of validation frames. values: int.
 
 # online training hyperparameters
@@ -17,10 +15,10 @@ optimizer_type: 'Adam' # Optimizer mechanism_type. values: 'Adam','RMSprop','SGD
 seed: 100 # run seed
 
 # concept drift mechanism
-mechanism: PERIODIC # ['ALWAYS','DRIFT','PERIODIC']
-modular: False
+mechanism: DRIFT # ['ALWAYS','DRIFT','PERIODIC']
+modular: True
 period: 10
-drift_detection_method: 'DDM' # ['DDM','PHT','HT','PST']
-drift_detection_method_hp: { 'alpha_ddm': 3, 'beta_ddm': 0.2,
-                             'beta_pht': 0.5, 'delta_pht': 0.8, 'lambda_pht': 0.01,
-                             'ht_threshold': 6, 'posterior_threshold': 0.03 }
+drift_detection_method: 'PST' # ['DDM','PHT','HT','PST']
+drift_detection_method_hp: { 'alpha_ddm': 8, 'beta_ddm': 0.25,
+                             'beta_pht': 0.2, 'delta_pht': 1, 'lambda_pht': 0.1,
+                             'ht_threshold': 0.005, 'posterior_threshold': 0.94 }

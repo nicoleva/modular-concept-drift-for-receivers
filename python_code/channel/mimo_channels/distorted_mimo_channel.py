@@ -5,8 +5,8 @@ from python_code.utils.config_singleton import Config
 
 conf = Config()
 
-CHANNEL_DISTORTS_EVERY = {0: 8, 1: 25, 2: 40, 3: 50}
-
+CHANNEL_DISTORTS_EVERY = {0: 7, 1: 18, 2: 22, 3: 28}
+C = 1.5
 
 class DistortedMIMOChannel:
     def __init__(self):
@@ -19,7 +19,7 @@ class DistortedMIMOChannel:
     def calculate_channel(self, n_user: int, frame_ind: int) -> np.ndarray:
         for user in range(n_user):
             if frame_ind > 0 and frame_ind % CHANNEL_DISTORTS_EVERY[user] == 0:
-                self.h[:, user] *= 2 ** ((-1) ** (frame_ind // CHANNEL_DISTORTS_EVERY[user]))
+                self.h[:, user] *= C ** ((-1) ** (frame_ind // CHANNEL_DISTORTS_EVERY[user]))
         return self.h
 
     @staticmethod

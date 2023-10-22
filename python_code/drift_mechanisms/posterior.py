@@ -12,12 +12,15 @@ class DriftPosterior:
         threshold_0 = self.calc_threshold(vec_0)
         threshold_1 = self.calc_threshold(vec_1)
         total_threshold = (vec_0.shape[0] * threshold_0 + vec_1.shape[0] * threshold_1) / probs_vec.shape[0]
-        if total_threshold > self.threshold:
+        print(f'Threshold: {total_threshold}')
+        if total_threshold < self.threshold:
             return True
         return False
 
     def calc_threshold(self, s_probs_vec):
         mu = s_probs_vec.mean()
-        sigma = torch.sqrt(mu * (1 - mu) / len(s_probs_vec))
-        threshold = sigma / mu
+        # sigma = torch.sqrt(mu * (1 - mu) / len(s_probs_vec))
+        # threshold = sigma / mu
+        threshold = mu
+        # print(f'mu:{mu},sigma:{sigma}')
         return threshold
