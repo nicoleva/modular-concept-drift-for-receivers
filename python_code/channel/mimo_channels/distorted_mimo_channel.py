@@ -10,6 +10,7 @@ CHANNEL_DISTORTS_EVERY = {0: 8, 1: 25, 2: 40, 3: 50}
 
 class DistortedMIMOChannel:
     def __init__(self):
+        # Antennas (rows) X Users (columns)
         self.h = np.array([[0.8, 0.4, 0.2, 0.1],
                            [0.4, 0.8, 0.4, 0.2],
                            [0.2, 0.4, 0.8, 0.4],

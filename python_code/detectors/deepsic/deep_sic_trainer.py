@@ -86,7 +86,6 @@ class DeepSICTrainer(Trainer):
         for user in range(self.n_user):
             if not self.train_users_list[user]:
                 continue
-            print(user)
             self.train_model(model[user][i], tx_all[user], rx_all[user])
 
     def _online_training(self, tx: torch.Tensor, rx: torch.Tensor):

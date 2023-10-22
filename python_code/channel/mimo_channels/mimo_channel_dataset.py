@@ -67,14 +67,13 @@ if __name__ == "__main__":
     total_h_mag = []
     for t in range(conf.blocks_num):
         tx, h, rx = channel_dataset.get_vectors(conf.snr, t)
-        total_h_mag.append(h)
+        total_h_mag.append(h.copy())
     total_h_mag = np.array(total_h_mag)
     fig, axs = plt.subplots(N_ANT, sharex=True)
     for j in range(N_ANT):
         current_axis = axs[j]
         for i in range(N_USER):
             current_axis.plot(total_h_mag[:, j, i], label=f'user {i + 1}', linewidth=3.2)
-
         current_axis.grid(True, which='both')
         current_axis.set_ylim([0, 1])
         current_axis.set_ylabel(f'Ant. {j + 1}')
