@@ -4,6 +4,7 @@ from typing import Tuple, List, Dict, Union
 
 from dir_definitions import CONFIG_RUNS_DIR
 from python_code.detectors.trainer import Trainer
+from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
 from python_code.evaluate import CHANNEL_TYPE_TO_TRAINER_DICT
 from python_code.plotters.plotter_utils import get_ser_plot
 from python_code.utils.config_singleton import Config
@@ -60,6 +61,6 @@ def compute_ser_for_method(all_curves: List[Tuple[float, str]], method: str, par
     full_method_name = f'{trainer.__str__()} - {method}'
     print(full_method_name)
     name = set_method_name(conf, full_method_name, params_dict)
-    if method is 'DriftDetectionDriven':
+    if method == TRAINING_TYPES.DRIFT.name:
         full_method_name += f'{params_dict["drift_detection_method"]}'
     add_ser(all_curves, conf, full_method_name, name, run_params_obj.run_over, run_params_obj.trial_num, trainer)

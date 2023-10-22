@@ -8,7 +8,9 @@ import numpy as np
 
 from dir_definitions import FIGURES_DIR, PLOTS_DIR
 from python_code.detectors.trainer import Trainer, alarms_dict
+from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
 from python_code.utils.config_singleton import Config
+from python_code.utils.constants import DetectorType
 from python_code.utils.python_utils import load_pkl, save_pkl
 
 mpl.rcParams['xtick.labelsize'] = 24
@@ -31,20 +33,18 @@ h_channel = []
 
 def get_linestyle(method_name: str) -> str:
     model_bb = str(conf.detector_type)
-    if 'model' in model_bb:
+    if DetectorType.model.name in model_bb:
         return 'solid'
-    elif 'black_box' in model_bb:
+    elif DetectorType.black_box.name in model_bb:
         return 'dotted'
     else:
         raise ValueError('No such detector!!!')
 
 
 def get_marker(method_name: str) -> str:
-    if 'Always' in method_name:
+    if TRAINING_TYPES.ALWAYS.name in method_name:
         return '.'
-    elif 'Random' in method_name:
-        return 'X'
-    elif 'Periodic' in method_name:
+    elif TRAINING_TYPES.PERIODIC.name in method_name:
         return 's'
     elif 'DDM' in method_name:
         return 'X'
@@ -59,11 +59,9 @@ def get_marker(method_name: str) -> str:
 
 
 def get_color(method_name: str) -> str:
-    if 'Always' in method_name:
+    if TRAINING_TYPES.ALWAYS.name in method_name:
         return 'b'
-    elif 'Random' in method_name:
-        return 'black'
-    elif 'Periodic' in method_name:
+    elif TRAINING_TYPES.PERIODIC.name in method_name:
         return 'green'
     elif 'DDM' in method_name:
         return 'red'
@@ -110,9 +108,9 @@ def plot_by_values(all_curves: List[Tuple[np.ndarray, str, np.ndarray]], values:
     # extract names from simulated plots
     names = []
     for i in range(len(all_curves)):
-        if 'Drift' in all_curves[i][1]:
+        if TRAINING_TYPES.DRIFT.name in all_curves[i][1]:
             names.append(all_curves[i][1].split(" - ")[1].split("_")[0])
-        elif 'Periodic' in all_curves[i][1]:
+        elif TRAINING_TYPES.PERIODIC.name in all_curves[i][1]:
             names.append(all_curves[i][1].split(" - ")[1] + f' ({conf.period})')
         else:
             names.append(all_curves[i][1].split(" - ")[1])
@@ -131,7 +129,7 @@ def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], pl
         for ser, cur_name, train_idn in all_curves:
             if method_name_reduced not in cur_name:
                 continue
-            if method_name_reduced == "Always":
+            if method_name_reduced == TRAINING_TYPES.ALWAYS.name:
                 train_annotation_dict[method_name] = list(range(0, len(train_idn[0]), 2))
             else:
                 train_annotation_dict[method_name] = np.argwhere(train_idn[0])[:, 0]
