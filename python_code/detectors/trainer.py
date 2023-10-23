@@ -137,20 +137,13 @@ class Trainer(object):
             tx_pilot, tx_data = tx[:conf.pilot_size], tx[conf.pilot_size:]
             rx_pilot, rx_data = rx[:conf.pilot_size], rx[conf.pilot_size:]
             self.train_users_list = [False for _ in range(N_USER)]
-            if drift_mechanism.is_train(kwargs):
-                if conf.modular and conf.channel_type == ChannelModes.MIMO.name and \
-                        conf.detector_type == DetectorType.model.name:
-                    # modular per-user training
-                    self.modular_training(block_idn_train, block_ind, drift_mechanism, kwargs)
-                else:
-                    print('re-training')
-                    # all users training
-                    for user in range(N_USER):
-                        self.train_users_list[user] = True
-                    block_idn_train[block_ind] = 1
-                print(self.train_users_list)
-                self._online_training(tx_pilot, rx_pilot)
-
+            if conf.modular and \
+                    conf.channel_type == ChannelModes.MIMO.name and \
+                    conf.detector_type == DetectorType.model.name:
+                # modular per-user training
+                self.modular_training(block_idn_train, block_ind, tx_pilot, rx_pilot, drift_mechanism, kwargs)
+            elif drift_mechanism.is_train(kwargs):
+                self.reg_training(block_idn_train, block_ind, rx_pilot, tx_pilot)
             # detect data part after training on the pilot part
             detected_word = self.forward(rx_data)
             # calculate accuracy
@@ -165,12 +158,24 @@ class Trainer(object):
         print(f'Final ser: {sum(total_ber) / len(total_ber)}, Total Re-trains: {sum(block_idn_train)}')
         return total_ber, block_idn_train
 
-    def modular_training(self, block_idn_train, block_ind, drift_mechanism, kwargs):
+    def reg_training(self, block_idn_train, block_ind, rx_pilot, tx_pilot):
+        print('re-training')
+        # all users training
+        for user in range(N_USER):
+            self.train_users_list[user] = True
+        block_idn_train[block_ind] = 1
+        print(self.train_users_list)
+        self._online_training(tx_pilot, rx_pilot)
+
+    def modular_training(self, block_idn_train, block_ind, tx_pilot, rx_pilot, drift_mechanism, kwargs):
         for user in range(N_USER):
             if drift_mechanism.is_train_user(user, kwargs):
                 print(f're-training user {user}')
                 self.train_users_list[user] = True
                 block_idn_train[block_ind] += 1 / N_USER
+        if sum(self.train_users_list) > 0:
+            print(self.train_users_list)
+            self._online_training(tx_pilot, rx_pilot)
 
     def run_train_loop(self, est: torch.Tensor, tx: torch.Tensor) -> float:
         # calculate loss

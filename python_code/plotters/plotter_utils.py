@@ -75,6 +75,16 @@ def get_color(method_name: str) -> str:
         raise ValueError('No such method!!!')
 
 
+LABELS_DICT = {
+    'ALWAYS': 'always',
+    'PERIODIC': 'periodic',
+    'DRIFTPST': 'PST',
+    'DRIFTHT': 'HT',
+    'DRIFTDDM': 'DDM',
+    'DRIFTPHT': 'PHT',
+}
+
+
 def get_ser_plot(dec: Trainer, run_over: bool, method_name: str, trial=None):
     print(method_name)
     # set the path to saved plot results for a single method (so we do not need to run anew each time)
@@ -109,7 +119,10 @@ def plot_by_values(all_curves: List[Tuple[np.ndarray, str, np.ndarray]], values:
     names = []
     for i in range(len(all_curves)):
         if TRAINING_TYPES.DRIFT.name in all_curves[i][1]:
-            names.append(all_curves[i][1].split(" - ")[1].split("_")[0])
+            name = all_curves[i][1].split(" - ")[1].split("_")[0]
+            if conf.modular:
+                name = name + " - Modular"
+            names.append(name)
         elif TRAINING_TYPES.PERIODIC.name in all_curves[i][1]:
             names.append(all_curves[i][1].split(" - ")[1] + f' ({conf.period})')
         else:
@@ -138,7 +151,7 @@ def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], pl
             if plot_type == 'plot_ber_aggregated':
                 agg_ser = (np.cumsum(avg_ser_trials) / np.arange(1, len(ser[0]) + 1))
                 sers_dict[method_name] = agg_ser
-                total_actions_dict[method_name] = int(np.sum(train_idn) / len(train_idn))
+                total_actions_dict[method_name] = float(np.sum(train_idn) / len(train_idn))
             else:
                 raise ValueError("No such plot mechanism_type!")
 
@@ -148,8 +161,12 @@ def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], pl
 def plot_common_aggregated(names: List[str], sers_dict: Dict[str, np.ndarray], annotation_dict: Dict[str, np.ndarray],
                            values: List[float], total_actions_dict: Dict[str, List]):
     for method_name in names:
+        if 'Modular' in method_name:
+            modular_label = "Modular "
+        else:
+            modular_label = ""
         plt.plot(values, sers_dict[method_name],
-                 label=method_name.replace("DriftDetectionDriven", "") + " " + f'[{total_actions_dict[method_name]}]',
+                 label=modular_label + LABELS_DICT[method_name.split(' ')[0]] + " " + f'[{total_actions_dict[method_name]}]',
                  color=get_color(method_name),
                  marker=get_marker(method_name), markersize=16,
                  linestyle=get_linestyle(method_name), linewidth=3.2,
@@ -172,7 +189,7 @@ def plot_common_aggregated(names: List[str], sers_dict: Dict[str, np.ndarray], a
                 except:
                     print("loaded from pkl")
     plt.yscale('log')
-    plt.legend(loc='lower right', prop={'size': 18})
+    plt.legend(loc='upper left', prop={'size': 18})
     plt.ylabel("Agg. BER")
     plt.xlabel("Block Index")
     major_ticks = np.arange(0, conf.blocks_num, 20)

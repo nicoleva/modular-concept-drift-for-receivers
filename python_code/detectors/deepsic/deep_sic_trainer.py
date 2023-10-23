@@ -48,7 +48,7 @@ class DeepSICTrainer(Trainer):
 
     def __str__(self):
         name = 'DeepSIC'
-        if conf.modular:
+        if conf.mechanism == TRAINING_TYPES.DRIFT.name and conf.modular:
             name = 'Modular ' + name
         return name
 

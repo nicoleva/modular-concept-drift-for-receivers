@@ -5,8 +5,8 @@ detector_type: 'model' # 'model' or 'black_box'
 snr: 12 # validation SNR value. values: float.
 
 # protocol
-block_length: 5500 # coherence block time, total size of pilot + data. values: int.
-pilot_size: 500 # pilot bits
+block_length: 7000 # coherence block time, total size of pilot + data. values: int.
+pilot_size: 2000 # pilot bits
 blocks_num: 100 # number of validation frames. values: int.
 
 # online training hyperparameters
@@ -18,7 +18,7 @@ seed: 100 # run seed
 mechanism: DRIFT # ['ALWAYS','DRIFT','PERIODIC']
 modular: False
 period: 10
-drift_detection_method: 'PST' # ['DDM','PHT','HT','PST']
-drift_detection_method_hp: { 'alpha_ddm': 8, 'beta_ddm': 0.25,
+drift_detection_method: 'DDM' # ['DDM','PHT','HT','PST']
+drift_detection_method_hp: { 'alpha_ddm': 5, 'beta_ddm': 0.25,
                              'beta_pht': 0.2, 'delta_pht': 1, 'lambda_pht': 0.1,
                              'ht_threshold': 0.005, 'posterior_threshold': 0.9 }
