@@ -1,6 +1,6 @@
 # channel
 channel_type: 'MIMO' # Channel mechanism_type values: ['SISO','MIMO'].
-channel_model: 'OneUserDistortedMIMOChannel' # Physical channel models: ['DistortedMIMO','SEDChannel']
+channel_model: 'DistortedMIMO' # Physical channel models: ['DistortedMIMO','SEDChannel']
 detector_type: 'model' # 'model' or 'black_box'
 snr: 12 # validation SNR value. values: float.
 

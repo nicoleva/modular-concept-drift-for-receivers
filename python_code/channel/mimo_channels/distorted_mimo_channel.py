@@ -6,7 +6,7 @@ from python_code.utils.config_singleton import Config
 conf = Config()
 
 CHANNEL_FLIPS_EVERY = {0: 7, 1: 18, 2: 22, 3: 28}
-C = 1.5
+C = 2
 
 class DistortedMIMOChannel:
     def __init__(self):
