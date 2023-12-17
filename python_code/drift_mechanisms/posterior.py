@@ -19,8 +19,4 @@ class DriftPosterior:
 
     def calc_threshold(self, s_probs_vec):
         mu = s_probs_vec.mean()
-        # sigma = torch.sqrt(mu * (1 - mu) / len(s_probs_vec))
-        # threshold = sigma / mu
-        threshold = mu
-        # print(f'mu:{mu},sigma:{sigma}')
-        return threshold
+        return mu
