@@ -17,8 +17,8 @@ optimizer_type: 'Adam' # Optimizer mechanism_type. values: 'Adam','RMSprop','SGD
 seed: 0 # run seed
 
 # concept drift mechanism
-mechanism: ALWAYS # ['always','random','drift','periodic']
-period: 100
+mechanism: DRIFT # ['always','random','drift','periodic']
+period: 10
 drift_detection_method: 'DDM' # ['DDM','PHT','HT']
 drift_detection_method_hp: { 'out_control_level': 3,'min_instances_ddm': 500,
                              'min_instances_pht': 10000,'threshold': 50, 'delta': 0.1 }

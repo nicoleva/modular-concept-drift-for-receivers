@@ -25,7 +25,7 @@ class DriftMechanismWrapper:
         self.drift_mechanism_list = [DRIFT_MECHANISMS_DICT[mechanism_type]() for _ in range(self.n_users)]
 
     def is_train(self, kwargs: Dict):
-        for user in range(N_USER):
+        for user in range(self.n_users):
             if self.is_train_user(user, kwargs):
                 return True
         return False

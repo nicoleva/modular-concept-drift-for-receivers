@@ -6,7 +6,7 @@ from dir_definitions import CONFIG_RUNS_DIR
 from python_code.detectors.trainer import Trainer
 from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
 from python_code.evaluate import CHANNEL_TYPE_TO_TRAINER_DICT
-from python_code.plotters.plotter_utils import get_ser_plot
+from python_code.plotters.plotter_utils import get_ser_plot, get_channel_h
 from python_code.utils.config_singleton import Config
 
 RunParams = namedtuple(
@@ -51,6 +51,7 @@ def add_ser(all_curves: List[Tuple[List[float], str]], conf: Config, method_name
         total_ser.append(ser)
         total_idn_trained.append(idn_trained)
     all_curves.append((total_ser, method_name, total_idn_trained))
+    get_channel_h(trainer)
 
 
 def compute_ser_for_method(all_curves: List[Tuple[float, str]], method: str, params_dict: Dict[str, Union[int, str]],

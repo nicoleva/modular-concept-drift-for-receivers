@@ -76,8 +76,8 @@ def get_color(method_name: str) -> str:
 
 
 LABELS_DICT = {
-    'ALWAYS': 'always',
-    'PERIODIC': 'periodic',
+    'ALWAYS': 'Always',
+    'PERIODIC': 'Periodic',
     'DRIFTPST': 'PST',
     'DRIFTHT': 'HT',
     'DRIFTDDM': 'DDM',
@@ -129,7 +129,14 @@ def plot_by_values(all_curves: List[Tuple[np.ndarray, str, np.ndarray]], values:
             names.append(all_curves[i][1].split(" - ")[1])
 
     cur_name, sers_dict, train_annotation_dict, total_actions_dict = populate_sers_dict(all_curves, names, plot_type)
-    plot_ber_aggregated(names, sers_dict, train_annotation_dict, values, folder_name, total_actions_dict)
+    if plot_type == 'plot_ber_aggregated':
+        plot_ber_aggregated(names, sers_dict, train_annotation_dict, values, folder_name, total_actions_dict)
+    elif plot_type == 'plot_by_snrs':
+        plot_ber_vs_snr(names, sers_dict, train_annotation_dict, values, folder_name, total_actions_dict, cur_name)
+    else:
+        raise ValueError("No such plot type!")
+
+    plot_channel()
 
 
 def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], plot_type: str) -> Tuple[
@@ -138,6 +145,7 @@ def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], pl
     total_actions_dict = {}
     train_annotation_dict = {}
     for method_name in names:
+        sers_list = []
         method_name_reduced = method_name.split(" ")[0]
         for ser, cur_name, train_idn in all_curves:
             if method_name_reduced not in cur_name:
@@ -151,6 +159,11 @@ def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], pl
             if plot_type == 'plot_ber_aggregated':
                 agg_ser = (np.cumsum(avg_ser_trials) / np.arange(1, len(ser[0]) + 1))
                 sers_dict[method_name] = agg_ser
+                total_actions_dict[method_name] = float(np.sum(train_idn) / len(train_idn))
+            elif plot_type == 'plot_by_snrs':
+                mean_ser = np.mean(ser)
+                sers_list.append(mean_ser)
+                sers_dict[method_name] = sers_list
                 total_actions_dict[method_name] = float(np.sum(train_idn) / len(train_idn))
             else:
                 raise ValueError("No such plot mechanism_type!")
@@ -209,8 +222,60 @@ def plot_ber_aggregated(names: List[str], sers_dict: Dict[str, np.ndarray], anno
                                                        f'_blocklen={str(conf.block_length)}.png'), bbox_inches='tight')
     plt.show()
 
+def plot_ber_vs_snr(names: List[str], sers_dict: Dict[str, np.ndarray], annotation_dict: Dict[str, np.ndarray],
+                        values: List[float], folder_name: str, total_actions_dict: Dict[str, List], cur_name: str):
+    plt.figure()
+    MARKER_EVERY = 1
+    x_ticks = values
+    x_labels = values
+    # plots all methods
+    unique_names = list(set(names))
 
+    for method_name in unique_names:
+        if 'Modular' in method_name:
+            modular_label = "Modular "
+        else:
+            modular_label = ""
+        plt.plot(values, sers_dict[method_name],
+                 label=modular_label + LABELS_DICT[method_name.split(' ')[0]] + " " + f'[{total_actions_dict[method_name]}]',
+                 color=get_color(method_name),
+                 marker=get_marker(method_name), markersize=11,
+                 linestyle=get_linestyle(method_name), linewidth=2.2,
+                 markevery=MARKER_EVERY)
+
+    plt.xticks(ticks=x_ticks, labels=x_labels)
+    plt.xlabel('SNR')
+    plt.ylabel('BER')
+    plt.grid(which='both', ls='--')
+    plt.legend(loc='lower left', prop={'size': 15})
+    plt.yscale('log')
+    trainer_name = cur_name.split(' ')[0]
+    plt.savefig(os.path.join(FIGURES_DIR, folder_name, f'coded_ber_versus_snrs_{trainer_name}.png'),
+                bbox_inches='tight')
+    plt.show()
 def get_channel_h(dec: Trainer):
     transmitted_words, received_words, hs = dec.channel_dataset.__getitem__(snr_list=[conf.snr])
     global h_channel
     h_channel = hs
+
+def plot_channel():
+    mimo = 0
+    if mimo:
+        h_channel_np = np.array(h_channel)
+        fig, ax = plt.subplots(nrows=4, ncols=1)
+        user = 0
+        for row in ax:
+            row.plot(h_channel_np[:, :, user])
+            user = user+1
+    else: #siso channel
+        h_channel_np = np.array(h_channel)
+        plt.figure()
+        for i in range(h_channel_np.shape[2]):
+            plt.plot(h_channel_np[:, :, i])
+
+    plt.xlabel("Block Index")
+    plt.ylabel("Magnitude")
+    plt.ylim(top=1.0)
+    plt.grid()
+
+    plt.show()

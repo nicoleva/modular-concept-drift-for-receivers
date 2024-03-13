@@ -26,7 +26,7 @@ mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['font.family'] = 'STIXGeneral'
 conf = Config()
 
-SISO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: Cost2100SISOChannel}
+SISO_CHANNELS_DICT = {ChannelModels.Cost2100.name: Cost2100SISOChannel}
 
 
 class SISOChannel:
@@ -58,7 +58,7 @@ class SISOChannel:
     def get_vectors(self, snr: float, index: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         # get channel values
         # transmit through noisy channel
-        if conf.channel_model == ChannelModels.DistortedMIMO.name:
+        if conf.channel_model == ChannelModels.Cost2100.name:
             h = Cost2100SISOChannel.calculate_channel(MEMORY_LENGTH, fading=conf.fading_in_channel, index=index)
         else:
             raise ValueError("No such channel model!!!")
