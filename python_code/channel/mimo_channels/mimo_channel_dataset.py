@@ -8,7 +8,7 @@ from numpy.random import default_rng
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
 from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMIMOChannel
 from python_code.channel.mimo_channels.one_user_distorted_mimo_channel import OneUserDistortedMIMOChannel
-from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel
+from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel, Cost2100MIMOChannel2nd
 from python_code.channel.mimo_channels.sed_channel import SEDChannel
 from python_code.channel.modulator import BPSKModulator
 from python_code.utils.config_singleton import Config
@@ -33,7 +33,8 @@ conf = Config()
 MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel,
                       ChannelModels.SEDChannel.name: SEDChannel,
                       ChannelModels.OneUserDistortedMIMOChannel.name:OneUserDistortedMIMOChannel,
-                      ChannelModels.Cost2100.name: Cost2100MIMOChannel
+                      ChannelModels.Cost2100.name: Cost2100MIMOChannel,
+                      ChannelModels.Cost21002nd.name: Cost2100MIMOChannel2nd
                       }
 
 
@@ -68,6 +69,8 @@ class MIMOChannel:
             h = self.h.calculate_channel(N_ANT, index)
         elif conf.channel_model == ChannelModels.Cost2100.name:
             h = Cost2100MIMOChannel.calculate_channel(N_ANT, N_USER, index, conf.fading_in_channel)
+        elif conf.channel_model == ChannelModels.Cost21002nd.name:
+            h = Cost2100MIMOChannel2nd.calculate_channel(N_ANT, N_USER, index, conf.fading_in_channel)
         else:
             raise ValueError("No such channel model!!!")
         tx, rx = self._transmit(h, snr)

@@ -13,7 +13,7 @@ class ChannelModels(Enum):
     OneUserDistortedMIMOChannel = 'OneUserDistortedMIMOChannel'
     SEDChannel = 'SEDChannel'
     Cost2100 = 'Cost2100'
-
+    Cost21002nd = 'Cost21002nd'
 
 class DetectorType(Enum):
     black_box = 'black_box'

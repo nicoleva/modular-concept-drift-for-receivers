@@ -17,7 +17,12 @@ class DriftDDM:
         if self.mu_t_prev is None and self.sigma_t_prev is None:
             self.mu_t_prev = mu_t
             self.sigma_t_prev = sigma_t
+            print(f"DEBUG 1 mu_t = {mu_t}, sigma_t = {sigma_t}, mu_t_prev = {self.mu_t_prev}, sigma_t_prev = {self.sigma_t_prev}")
         if mu_t + sigma_t > self.mu_t_prev + self.alpha * self.sigma_t_prev:
+            print(
+                f"DEBUG 2 mu_t = {mu_t}, sigma_t = {sigma_t}, mu_t_prev = {self.mu_t_prev}, sigma_t_prev = {self.sigma_t_prev}")
+            print(f"DEBUG 3 {mu_t} + {sigma_t} (={mu_t + sigma_t}) > "
+                  f"{self.mu_t_prev} + {self.alpha * self.sigma_t_prev} (={self.mu_t_prev + self.alpha * self.sigma_t_prev}")
             self.mu_t_prev = mu_t
             self.sigma_t_prev = sigma_t
             return 1

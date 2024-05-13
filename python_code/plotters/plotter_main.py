@@ -4,20 +4,26 @@ from python_code.plotters.plotter_methods import compute_ser_for_method, RunPara
 from python_code.plotters.plotter_utils import plot_by_values
 
 if __name__ == '__main__':
-    run_over = True  # whether to run over previous results
+    run_over = False  # whether to run over previous results
     trial_num = 1  # number of trials per point estimate, used to reduce noise by averaging results  of multiple runs
     run_params_obj = RunParams(run_over=run_over,
                                trial_num=trial_num)
     #label_name = PlotType.MIMO_BER_By_SNR
     #label_name = PlotType.SingleUserDistortedMIMODeepSIC
-    #label_name = PlotType.ModularSingleUserDistortedMIMODeepSIC
+    label_name = PlotType.ModularSingleUserDistortedMIMODeepSIC
+    #label_name = PlotType.SingleUserDistortedMIMODeepSICDNN
+    #label_name = PlotType.ModularSingleUserDistortedMIMODeepSICDNN
     #label_name = PlotType.DistortedMIMODeepSIC
     #label_name = PlotType.SOFT_SER_BLOCK_LINEAR_COST
     #label_name = PlotType.LinearSISO
     #label_name = PlotType.SISO_BER_By_SNR
     #label_name = PlotType.LinearSISO
-    #label_name = PlotType.LinearSISO_RNN
-    label_name = PlotType.SISO_BER_By_SNR_RNN
+    #label_name = PlotType.LinearSISO_![](../../../../Downloads/Figure_2_modular2.png)![](../../../../Downloads/Figure_2_1.png)![](../../../../Downloads/Figure_2_modular.png)![](../../../../Downloads/Figure_1_modular4.png)![](../../../../Downloads/Figure_1_modular3.png)![](../../../../Downloads/Figure_1_modular2.png)![](../../../../Downloads/Figure_1_modular.png)![](../../../../Downloads/Figure_1_1.png)![](../../../../Downloads/Figure_1.png)RNN
+    #label_name = PlotType.SISO_BER_By_SNR_RNN
+    #label_name = PlotType.CostMIMODeepSIC
+    #label_name = PlotType.ModularCostMIMODeepSIC
+    #label_name = PlotType.ModularSingleUserDistortedMIMODeepSICSNR
+    #label_name = PlotType.SingleUserDistortedMIMODeepSICSNR
 
 
     print(label_name.name)

@@ -259,7 +259,7 @@ def get_channel_h(dec: Trainer):
     h_channel = hs
 
 def plot_channel():
-    mimo = 0
+    mimo = 1
     if mimo:
         h_channel_np = np.array(h_channel)
         fig, ax = plt.subplots(nrows=4, ncols=1)
