@@ -43,7 +43,7 @@ def add_ser(all_curves: List[Tuple[List[float], str]], conf: Config, method_name
     total_ser = []
     total_idn_trained = []
     for trial in range(trial_num):
-        conf.set_value('seed', 1 + trial)
+        conf.set_value('seed', 36 + trial)
         trainer.__init__()
         ser, idn_trained = get_ser_plot(trainer, run_over=run_over,
                                         method_name=method_name + name,

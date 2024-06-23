@@ -136,7 +136,8 @@ def plot_by_values(all_curves: List[Tuple[np.ndarray, str, np.ndarray]], values:
     else:
         raise ValueError("No such plot type!")
 
-    plot_channel()
+    siso_mimo = (conf.channel_type == 'MIMO')
+    plot_channel(siso_mimo)
 
 
 def populate_sers_dict(all_curves: List[Tuple[float, str]], names: List[str], plot_type: str) -> Tuple[
@@ -244,10 +245,21 @@ def plot_ber_vs_snr(names: List[str], sers_dict: Dict[str, np.ndarray], annotati
                  markevery=MARKER_EVERY)
 
     plt.xticks(ticks=x_ticks, labels=x_labels)
-    plt.xlabel('SNR')
+    plt.xlabel('SNR [dB]')
     plt.ylabel('BER')
     plt.grid(which='both', ls='--')
-    plt.legend(loc='lower left', prop={'size': 15})
+    handles, labels = plt.gca().get_legend_handles_labels()
+    order = [3, 0, 1, 2]
+    for i in range(4):
+        if 'Periodic' in labels[i]:
+            order[i] = 0
+        elif 'Always' in labels[i]:
+            order[i] = 1
+        elif 'HT' in labels[i]:
+            order[i] = 2
+        else:
+            order[i] = 3
+    plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='lower left', prop={'size': 15})
     plt.yscale('log')
     trainer_name = cur_name.split(' ')[0]
     plt.savefig(os.path.join(FIGURES_DIR, folder_name, f'coded_ber_versus_snrs_{trainer_name}.png'),
@@ -258,24 +270,33 @@ def get_channel_h(dec: Trainer):
     global h_channel
     h_channel = hs
 
-def plot_channel():
-    mimo = 1
+def plot_channel(siso_mimo):
+    mimo = (siso_mimo == 1)
     if mimo:
         h_channel_np = np.array(h_channel)
-        fig, ax = plt.subplots(nrows=4, ncols=1)
+        fig, ax = plt.subplots(nrows=4, ncols=1, sharex=True, sharey=True)
+        ax1 = fig.add_subplot(111, frameon=False)
+        ax1.grid(None)
+        plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
         user = 0
         for row in ax:
-            row.plot(h_channel_np[:, :, user])
+            for tap in range(4):
+                row.plot(h_channel_np[:, tap, user], label="Coeff. {0}".format(str(tap+1)))
+            row.legend(loc='upper right', prop={'size': 10})
+            row.grid()
             user = user+1
+
     else: #siso channel
         h_channel_np = np.array(h_channel)
         plt.figure()
         for i in range(h_channel_np.shape[2]):
-            plt.plot(h_channel_np[:, :, i])
+            plt.plot(h_channel_np[:, :, i], label="Tap {0}".format(str(i+1)))
+        plt.ylim(top=1.0)
+        plt.legend(loc='upper right', prop={'size': 15})
 
     plt.xlabel("Block Index")
-    plt.ylabel("Magnitude")
-    plt.ylim(top=1.0)
+    plt.ylabel("Magnitude", loc='center', labelpad=15)
     plt.grid()
+
 
     plt.show()
