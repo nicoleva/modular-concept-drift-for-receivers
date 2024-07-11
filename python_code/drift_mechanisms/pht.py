@@ -13,7 +13,7 @@ class DriftPHT:
         self.previous_distance = None
 
     def check_drift(self, samples_vector: torch.Tensor):
-        average = samples_vector.mean()
+        average = abs(samples_vector).mean()
         mu_t = self.beta * average + (1 - self.beta) * self.mu_t_prev
         norm = abs(samples_vector - mu_t)
         differences_vector = norm - self.delta
@@ -24,7 +24,7 @@ class DriftPHT:
         distance_diff = abs(distance - self.previous_distance)
         print(f'Threshold: {distance_diff}')
         if distance_diff != math.inf and distance_diff > self.lambda_value:
-            self.mu_t_prev = samples_vector.mean()
+            self.mu_t_prev = average
             self.previous_distance = None
             return 1
         self.mu_t_prev = mu_t

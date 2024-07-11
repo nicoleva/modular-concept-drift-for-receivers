@@ -15,7 +15,7 @@ if __name__ == '__main__':
     #label_name = PlotType.DistortedMIMODeepSIC
     #label_name = PlotType.SOFT_SER_BLOCK_LINEAR_COST
     #label_name = PlotType.SISO_BER_By_SNR
-    label_name = PlotType.SISO_BER_By_SNR_RNN
+    #label_name = PlotType.SISO_BER_By_SNR_RNN
     #label_name = PlotType.LinearSISO
     #label_name = PlotType.LinearSISO_RNN
     #label_name = PlotType.CostMIMODeepSIC
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     #label_name = PlotType.SingleUserDistortedMIMODeepSICSNR
     #label_name = PlotType.MultiDistortedMIMODeepSIC
     #label_name = PlotType.ModularMultiDistortedMIMODeepSIC
-    #label_name = PlotType.MultiDistortedMIMODNN
+    label_name = PlotType.MultiDistortedMIMODNN
 
 
     print(label_name.name)

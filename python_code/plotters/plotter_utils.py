@@ -25,6 +25,7 @@ mpl.rcParams['lines.markersize'] = 8
 mpl.rcParams['legend.fontsize'] = 20
 mpl.rcParams['mathtext.fontset'] = 'stix'
 mpl.rcParams['font.family'] = 'STIXGeneral'
+mpl.use('TkAgg')
 
 conf = Config()
 
@@ -203,7 +204,24 @@ def plot_common_aggregated(names: List[str], sers_dict: Dict[str, np.ndarray], a
                 except:
                     print("loaded from pkl")
     plt.yscale('log')
-    plt.legend(loc='upper left', prop={'size': 18})
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    if len(handles) > 4:
+        order = [3, 0, 1, 2, 4]
+        for i in range(5):
+            if 'Periodic' in labels[i]:
+                order[i] = 0
+            elif 'Always' in labels[i]:
+                order[i] = 1
+            elif 'DDM' in labels[i]:
+                order[i] = 2
+            elif 'PHT' in labels[i]:
+                order[i] = 3
+            else:
+                order[i] = 4
+        plt.legend([handles[idx] for idx in order], [labels[idx] for idx in order], loc='lower right', prop={'size': 15})
+    else:
+        plt.legend(loc='upper left', prop={'size': 18})
     plt.ylabel("Agg. BER")
     plt.xlabel("Block Index")
     major_ticks = np.arange(0, conf.blocks_num, 20)
@@ -249,16 +267,18 @@ def plot_ber_vs_snr(names: List[str], sers_dict: Dict[str, np.ndarray], annotati
     plt.ylabel('BER')
     plt.grid(which='both', ls='--')
     handles, labels = plt.gca().get_legend_handles_labels()
-    order = [3, 0, 1, 2]
+    order = [3, 0, 1, 2, 4]
     for i in range(4):
         if 'Periodic' in labels[i]:
             order[i] = 0
         elif 'Always' in labels[i]:
             order[i] = 1
-        elif 'HT' in labels[i]:
+        elif 'DDM' in labels[i]:
             order[i] = 2
-        else:
+        elif 'PHT' in labels[i]:
             order[i] = 3
+        else:
+            order[i] = 4
     plt.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='lower left', prop={'size': 15})
     plt.yscale('log')
     trainer_name = cur_name.split(' ')[0]
