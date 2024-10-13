@@ -3,15 +3,16 @@ from typing import List
 import numpy as np
 import torch
 from torch import nn
+import math
 
 from python_code import DEVICE
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
-from python_code.channel.modulator import BPSKModulator
+from python_code.channel.modulator import BPSKModulator, QPSKModulator, MODULATION_NUM_MAPPING
 from python_code.detectors.deepsic.deep_sic_detector import DeepSICDetector
 from python_code.detectors.trainer import Trainer
 from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
 from python_code.utils.config_singleton import Config
-from python_code.utils.constants import HALF
+from python_code.utils.constants import HALF, ModulationType
 from python_code.utils.hotelling_test_utils import run_hotelling_test
 
 conf = Config()
@@ -27,6 +28,19 @@ def prob_to_BPSK_symbol(p: torch.Tensor) -> torch.Tensor:
     :return: symbols vector
     """
     return torch.sign(p - HALF)
+
+def prob_to_QPSK_symbol(p: torch.Tensor) -> torch.Tensor:
+    """
+    Converts Probabilities to QPSK Symbols by hard threshold.
+    first bit: [0,0.5] -> '+1',[0.5,1] -> '-1'
+    second bit: [0,0.5] -> '+1',[0.5,1] -> '-1'
+    """
+    p_real_neg = p[:, :, 0] + p[:, :, 2]
+    first_symbol = (-1) * torch.sign(p_real_neg - HALF)
+    p_img_neg = p[:, :, 1] + p[:, :, 2]
+    second_symbol = (-1) * torch.sign(p_img_neg - HALF)
+    s = torch.cat([first_symbol.unsqueeze(-1), second_symbol.unsqueeze(-1)], dim=-1)
+    return torch.view_as_complex(s)
 
 
 class DeepSICTrainer(Trainer):
@@ -44,6 +58,9 @@ class DeepSICTrainer(Trainer):
         self.ht = [0] * N_USER
         self.prev_ht_s1 = [[[] for _ in range(ITERATIONS)] for _ in range(self.n_user)]
         self.prev_ht_s0 = [[[] for _ in range(ITERATIONS)] for _ in range(self.n_user)]
+        self.constellation_bits = int(math.log2(MODULATION_NUM_MAPPING[conf.modulation_type]))
+        self.data_size = int((conf.block_length - conf.pilot_size)/self.constellation_bits)
+        self.pilot_size = int(conf.pilot_size/self.constellation_bits)
         super().__init__()
 
     def __str__(self):
@@ -53,8 +70,36 @@ class DeepSICTrainer(Trainer):
         return name
 
     def init_priors(self):
-        self.probs_vec = HALF * torch.ones(conf.block_length - conf.pilot_size, N_ANT).to(DEVICE).float()
-        self.pilots_probs_vec = HALF * torch.ones(conf.pilot_size, N_ANT).to(DEVICE).float()
+        if conf.modulation_type == ModulationType.BPSK.name:
+            probs_vec = HALF * torch.ones(self.data_size, N_ANT).to(DEVICE).float()
+            pilots_probs_vec = HALF * torch.ones(self.pilot_size, N_ANT).to(DEVICE).float()
+        elif conf.modulation_type in [ModulationType.QPSK.name]:
+            probs_vec = (1 / MODULATION_NUM_MAPPING[conf.modulation_type]) * torch.ones(
+                self.data_size, N_ANT).to(DEVICE).unsqueeze(
+                -1).repeat([1, 1, MODULATION_NUM_MAPPING[conf.modulation_type] - 1])
+            pilots_probs_vec = (1 / MODULATION_NUM_MAPPING[conf.modulation_type]) * torch.ones(
+                self.pilot_size, N_ANT).to(DEVICE).unsqueeze(
+                -1).repeat([1, 1, MODULATION_NUM_MAPPING[conf.modulation_type] - 1])
+        else:
+            raise ValueError("No such constellation!")
+        self.probs_vec = probs_vec
+        self.pilots_probs_vec = pilots_probs_vec
+
+    def init_priors_for_infer(self):
+        if conf.modulation_type == ModulationType.BPSK.name:
+            probs_vec = HALF * torch.ones(self.data_size, N_ANT).to(DEVICE).float()
+            pilots_probs_vec = HALF * torch.ones(self.pilot_size, N_ANT).to(DEVICE).float()
+        elif conf.modulation_type in [ModulationType.QPSK.name]:
+            probs_vec = (1 / MODULATION_NUM_MAPPING[conf.modulation_type]) * torch.ones(
+                self.data_size, N_ANT).to(DEVICE).unsqueeze(-1)
+            probs_vec = probs_vec.repeat([1, 1, MODULATION_NUM_MAPPING[conf.modulation_type] - 1]).float()
+            pilots_probs_vec = (1 / MODULATION_NUM_MAPPING[conf.modulation_type]) * torch.ones(
+                self.pilot_size, N_ANT).to(DEVICE).unsqueeze(-1)
+            pilots_probs_vec = pilots_probs_vec.repeat([1, 1, MODULATION_NUM_MAPPING[conf.modulation_type] - 1]).float()
+        else:
+            raise ValueError("No such constellation!")
+        self.probs_vec = probs_vec
+        self.pilots_probs_vec = pilots_probs_vec
 
     def _initialize_detector(self):
         self.detector = [[DeepSICDetector().to(DEVICE) for _ in range(ITERATIONS)] for _ in
@@ -68,7 +113,11 @@ class DeepSICTrainer(Trainer):
 
     @staticmethod
     def preprocess(rx: torch.Tensor) -> torch.Tensor:
-        return rx.float()
+        if conf.modulation_type == ModulationType.BPSK.name:
+            return rx.float()
+        elif conf.modulation_type in [ModulationType.QPSK.name]:
+            y_input = torch.view_as_real(rx[:, :conf.n_ant]).float().reshape(rx.shape[0], -1)
+            return torch.cat([y_input, rx[:, conf.n_ant:].float()], dim=1)
 
     def train_model(self, single_model: nn.Module, tx: torch.Tensor, rx: torch.Tensor):
         """
@@ -116,14 +165,17 @@ class DeepSICTrainer(Trainer):
 
     def forward(self, rx: torch.Tensor) -> torch.Tensor:
         # detect and decode
-        self.init_priors()
+        self.init_priors_for_infer()
         for i in range(ITERATIONS):
             self.probs_vec = self.calculate_posteriors(self.detector, i + 1, self.probs_vec, rx)
-        detected_word = BPSKModulator.demodulate(prob_to_BPSK_symbol(self.probs_vec.float()))
+        if conf.modulation_type == ModulationType.QPSK.name:
+            detected_word = QPSKModulator.demodulate(prob_to_QPSK_symbol(self.probs_vec.float()))
+        else:
+            detected_word = BPSKModulator.demodulate(prob_to_BPSK_symbol(self.probs_vec.float()))
         return detected_word
 
     def forward_pilot(self, rx: torch.Tensor, tx: torch.Tensor) -> torch.Tensor:
-        self.init_priors()
+        self.init_priors_for_infer()
         # detect and decode
         ht_s0_t_0 = [[[] for _ in range(ITERATIONS)] for _ in range(self.n_user)]
         ht_s1_t_0 = [[[] for _ in range(ITERATIONS)] for _ in range(self.n_user)]
@@ -143,7 +195,10 @@ class DeepSICTrainer(Trainer):
                 self.prev_ht_s1[user][i] = ht_s1_t_0[user][i].copy()
         if np.prod(np.shape(ht_mat[self.n_user - 1][ITERATIONS - 1])) != 0:
             self.ht = [row[ITERATIONS - 1] for row in ht_mat]
-        detected_word = BPSKModulator.demodulate(prob_to_BPSK_symbol(self.pilots_probs_vec.float()))
+        if conf.modulation_type == ModulationType.QPSK.name:
+            detected_word = QPSKModulator.demodulate(prob_to_QPSK_symbol(self.pilots_probs_vec.float()))
+        else:
+            detected_word = BPSKModulator.demodulate(prob_to_BPSK_symbol(self.pilots_probs_vec.float()))
         return detected_word, self.pilots_probs_vec
 
     def prepare_data_for_training(self, tx: torch.Tensor, rx: torch.Tensor, probs_vec: torch.Tensor) -> [

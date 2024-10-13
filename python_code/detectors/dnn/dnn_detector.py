@@ -23,6 +23,16 @@ class DNNDetector(nn.Module):
     def initialize_dnn(self):
         layers = [nn.Linear(self.base_rx_size, HIDDEN_SIZE),
                   nn.ReLU(),
+                  nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),
+                  nn.ReLU(),
+                  nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),
+                  nn.ReLU(),
+                  nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),
+                  nn.ReLU(),
+                  nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),
+                  nn.ReLU(),
+                  nn.Linear(HIDDEN_SIZE, HIDDEN_SIZE),
+                  nn.ReLU(),
                   nn.Linear(HIDDEN_SIZE, self.n_states),
                   nn.Softmax()]
         self.net = nn.Sequential(*layers).to(DEVICE)

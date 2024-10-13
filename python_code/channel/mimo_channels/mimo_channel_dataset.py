@@ -10,9 +10,9 @@ from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMI
 from python_code.channel.mimo_channels.one_user_distorted_mimo_channel import OneUserDistortedMIMOChannel
 from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel, Cost2100MIMOChannel2nd
 from python_code.channel.mimo_channels.sed_channel import SEDChannel
-from python_code.channel.modulator import BPSKModulator
+from python_code.channel.modulator import BPSKModulator, QPSKModulator
 from python_code.utils.config_singleton import Config
-from python_code.utils.constants import ChannelModels
+from python_code.utils.constants import ChannelModels, ModulationType
 
 R = 9 / 6.45
 
@@ -36,7 +36,8 @@ MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel,
                       ChannelModels.Cost2100.name: Cost2100MIMOChannel,
                       ChannelModels.Cost21002nd.name: Cost2100MIMOChannel2nd
                       }
-
+def get_qpsk_symbols_from_bits(b: np.ndarray) -> np.ndarray:
+    return b[::2] + 2 * b[1::2]
 
 class MIMOChannel:
     def __init__(self, block_length: int, pilots_length: int):
@@ -49,13 +50,25 @@ class MIMOChannel:
         self.h = MIMO_CHANNELS_DICT[conf.channel_model]()
 
     def _transmit(self, h: np.ndarray, snr: float) -> Tuple[np.ndarray, np.ndarray]:
-        tx_pilots = self._bits_generator.integers(0, BPSKModulator.constellation_size,
-                                                  size=(self._pilots_length, N_USER))
-        tx_data = self._bits_generator.integers(0, BPSKModulator.constellation_size,
-                                                size=(self._block_length - self._pilots_length, N_USER))
-        tx = np.concatenate([tx_pilots, tx_data])
-        # modulation
-        s = BPSKModulator.modulate(tx.T)
+        if conf.modulation_type == ModulationType.BPSK.name:
+            tx_pilots = self._bits_generator.integers(0, BPSKModulator.constellation_size,
+                                                      size=(self._pilots_length, N_USER))
+            tx_data = self._bits_generator.integers(0, BPSKModulator.constellation_size,
+                                                    size=(self._block_length - self._pilots_length, N_USER))
+            tx = np.concatenate([tx_pilots, tx_data])
+            # modulation
+            s = BPSKModulator.modulate(tx.T)
+        elif conf.modulation_type == ModulationType.QPSK.name:
+            tx_pilots = self._bits_generator.integers(0, QPSKModulator.constellation_size,
+                                                      size=(self._pilots_length, N_USER))
+            tx_data = self._bits_generator.integers(0, QPSKModulator.constellation_size,
+                                                    size=(self._block_length - self._pilots_length, N_USER))
+            tx = np.concatenate([tx_pilots, tx_data])
+            # modulation
+            s = QPSKModulator.modulate(tx.T)
+            tx = get_qpsk_symbols_from_bits(tx)
+        else:
+            raise Exception ("Do not support other constellation")
         # pass through channel
         rx = MIMO_CHANNELS_DICT[conf.channel_model].transmit(s=s, h=h, snr=snr)
         return tx, rx.T

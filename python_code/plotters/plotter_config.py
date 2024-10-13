@@ -22,6 +22,7 @@ class PlotType(Enum):
     SISO_BER_By_SNR_RNN = 'SISO_BER_By_SNR_RNN'
     MIMO_BER_By_SNR = 'MIMO_BER_By_SNR'
     CostMIMODeepSIC = 'CostMIMODeepSIC'
+    CostMIMODeepSICQPSK = 'CostMIMODeepSICQPSK'
     ModularCostMIMODeepSIC = 'ModularCostMIMODeepSIC'
     CostMIMODNN = 'CostMIMODNN'
     MultiDistortedMIMODeepSIC = 'MultiDistortedMIMODeepSIC'
@@ -128,10 +129,36 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
             {'drift_detection_method': 'DDM',
              'drift_detection_method_hp': {'alpha_ddm': 7.5, 'beta_ddm': 0.2},
              },
-            {'drift_detection_method': 'PHT',
-             'drift_detection_method_hp': {'beta_pht': 0.9, 'delta_pht': 0.8, 'lambda_pht': 0.05},
-             #'drift_detection_method_hp': {'beta_pht': 0.9, 'delta_pht': 0.8, 'lambda_pht': 0.04},
+            # {'drift_detection_method': 'PHT',
+            #  'drift_detection_method_hp': {'beta_pht': 0.9, 'delta_pht': 1, 'lambda_pht': 0.08},
+            #  },
+            {'drift_detection_method': 'HT',
+             'drift_detection_method_hp': {'ht_threshold': 0.015},
              },
+        ]
+        values = list(range(100))
+        xlabel, ylabel = 'block_index', 'BER'
+        plot_type = 'plot_ber_aggregated'
+    elif label_name == PlotType.CostMIMODeepSICQPSK.name:
+        methods_list = [
+            'PERIODIC',
+            #'ALWAYS',
+            #'DRIFT',
+        ]
+        params_dicts = [
+            {'snr': 12, 'detector_type': DetectorType.model.name, 'modulation_type': 'QPSK',
+             'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
+             'channel_model': ChannelModels.Cost21002nd.name,'fading_in_channel': False,
+             'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
+             'modular': False, 'drift_detection_method_hp': None,}
+        ]
+        drift_detection_methods = [
+            {'drift_detection_method': 'DDM',
+             'drift_detection_method_hp': {'alpha_ddm': 7.5, 'beta_ddm': 0.2},
+             },
+            # {'drift_detection_method': 'PHT',
+            #  'drift_detection_method_hp': {'beta_pht': 0.9, 'delta_pht': 1, 'lambda_pht': 0.08},
+            #  },
             {'drift_detection_method': 'HT',
              'drift_detection_method_hp': {'ht_threshold': 0.015},
              },
@@ -156,16 +183,12 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
             {'drift_detection_method': 'DDM',
              'drift_detection_method_hp': {'alpha_ddm': 2, 'beta_ddm': 0.2},
              },
-            # {'drift_detection_method': 'PHT',
-            #  'drift_detection_method_hp': {'beta_pht': 0.7, 'delta_pht': 0.5, 'lambda_pht': 0.025},
-            #  #'drift_detection_method_hp': {'beta_pht': 0.8, 'delta_pht': 0.6, 'lambda_pht': 0.015},
-            #  },
+            {'drift_detection_method': 'PHT',
+             'drift_detection_method_hp': {'beta_pht': 0.9, 'delta_pht': 0.08, 'lambda_pht': 0.03},
+             },
             {'drift_detection_method': 'HT',
              'drift_detection_method_hp': {'ht_threshold': 0.003},
              },
-            # {'drift_detection_method': 'PST',
-            #  'drift_detection_method_hp': {'posterior_threshold': 0.00001},
-            #  },
         ]
         values = list(range(100))
         xlabel, ylabel = 'block_index', 'BER'
@@ -323,14 +346,14 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         ]
         drift_detection_methods = [
             {'drift_detection_method': 'DDM',
-             'drift_detection_method_hp': {'alpha_ddm': 35, 'beta_ddm': 0.2},
+             'drift_detection_method_hp': {'alpha_ddm': 15, 'beta_ddm': 0.2},
              },
             {'drift_detection_method': 'HT',
-             'drift_detection_method_hp': {'ht_threshold': 0.7},
+             'drift_detection_method_hp': {'ht_threshold': 0.8},
              },
-            {'drift_detection_method': 'PHT',
-             'drift_detection_method_hp': {'beta_pht': 0.8, 'delta_pht': 1, 'lambda_pht': 0.08},
-             },
+            # {'drift_detection_method': 'PHT',
+            #  'drift_detection_method_hp': {'beta_pht': 0.8, 'delta_pht': 1, 'lambda_pht': 0.08},
+            #  },
         ]
         values = list(range(100))
         xlabel, ylabel = 'block_index', 'BER'
@@ -635,8 +658,8 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         plot_type = 'plot_by_snrs'
     elif label_name == PlotType.CostMIMODNNSNR.name:
         methods_list = [
-            'PERIODIC',
-            'ALWAYS',
+            #'PERIODIC',
+            #'ALWAYS',
             'DRIFT',
         ]
         params_dicts = [
@@ -645,32 +668,32 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
              'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
              'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
              'modular': False, 'drift_detection_method_hp': None},
-            {'snr': 10, 'detector_type': DetectorType.black_box.name,
-             'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
-             'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
-             'modular': False, 'drift_detection_method_hp': None},
-            {'snr': 11, 'detector_type': DetectorType.black_box.name,
-             'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
-             'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
-             'modular': False, 'drift_detection_method_hp': None},
-            {'snr': 12, 'detector_type': DetectorType.black_box.name,
-             'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
-             'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
-             'modular': False, 'drift_detection_method_hp': None},
-            {'snr': 13, 'detector_type': DetectorType.black_box.name,
-             'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
-             'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
-             'modular': False, 'drift_detection_method_hp': None},
+            # {'snr': 10, 'detector_type': DetectorType.black_box.name,
+            #  'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
+            #  'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
+            #  'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
+            #  'modular': False, 'drift_detection_method_hp': None},
+            # {'snr': 11, 'detector_type': DetectorType.black_box.name,
+            #  'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
+            #  'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
+            #  'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
+            #  'modular': False, 'drift_detection_method_hp': None},
+            # {'snr': 12, 'detector_type': DetectorType.black_box.name,
+            #  'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
+            #  'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
+            #  'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
+            #  'modular': False, 'drift_detection_method_hp': None},
+            # {'snr': 13, 'detector_type': DetectorType.black_box.name,
+            #  'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
+            #  'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
+            #  'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
+            #  'modular': False, 'drift_detection_method_hp': None},
 
         ]
         drift_detection_methods = [
-            {'drift_detection_method': 'DDM',
-             'drift_detection_method_hp': {'alpha_ddm': 7.5, 'beta_ddm': 0.2},
-             },
+            # {'drift_detection_method': 'DDM',
+            #  'drift_detection_method_hp': {'alpha_ddm': 7.5, 'beta_ddm': 0.2},
+            #  },
             {'drift_detection_method': 'HT',
              'drift_detection_method_hp': {'ht_threshold': 0.07},
              },

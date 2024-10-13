@@ -20,7 +20,7 @@ if __name__ == '__main__':
     #label_name = PlotType.LinearSISO_RNN
     #label_name = PlotType.CostMIMODeepSIC
     #label_name = PlotType.ModularCostMIMODeepSIC
-    #label_name = PlotType.CostMIMODNN
+    label_name = PlotType.CostMIMODNN
     #label_name = PlotType.ModularSingleUserDistortedMIMODeepSICSNR
     #label_name = PlotType.ModularCostMIMODeepSICSNR
     #label_name = PlotType.CostMIMODeepSICSNR
@@ -28,7 +28,9 @@ if __name__ == '__main__':
     #label_name = PlotType.SingleUserDistortedMIMODeepSICSNR
     #label_name = PlotType.MultiDistortedMIMODeepSIC
     #label_name = PlotType.ModularMultiDistortedMIMODeepSIC
-    label_name = PlotType.MultiDistortedMIMODNN
+    #label_name = PlotType.MultiDistortedMIMODNN
+    #label_name = PlotType.CostMIMODeepSICQPSK
+
 
 
     print(label_name.name)

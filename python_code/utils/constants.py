@@ -18,3 +18,8 @@ class ChannelModels(Enum):
 class DetectorType(Enum):
     black_box = 'black_box'
     model = 'model'
+
+class ModulationType(Enum):
+    BPSK = 'BPSK'
+    QPSK = 'QPSK'
+    EightPSK = 'EightPSK'
