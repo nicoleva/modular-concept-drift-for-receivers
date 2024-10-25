@@ -3,7 +3,7 @@ channel_type: 'MIMO' # Channel mechanism_type values: ['SISO','MIMO'].
 channel_model: 'OneUserDistortedMIMOChannel' # Physical channel models: ['DistortedMIMO','SEDChannel','OneUserDistortedMIMOChannel']
 detector_type: 'model' # 'model' or 'black_box'
 snr: 12 # validation SNR value. values: float.
-modulation_type: 'QPSK' # 'BPSK', 'QPSK'
+modulation_type: 'QAM16' # 'BPSK', 'QPSK', 'QAM16'
 n_user: 4 # number of transmitting devices
 n_ant: 4 # number of received signals
 

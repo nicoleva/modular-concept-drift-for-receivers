@@ -7,7 +7,8 @@ from torch import nn
 
 from python_code import DEVICE
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
-from python_code.channel.modulator import MODULATION_NUM_MAPPING, MODULATION_DICT
+from python_code.channel.modulator import MODULATION_NUM_MAPPING, MODULATION_DICT, prob_to_BPSK_symbol, \
+    prob_to_QPSK_symbol, prob_to_16QAM_symbol
 from python_code.detectors.deepsic.deep_sic_detector import DeepSICDetector
 from python_code.detectors.trainer import Trainer
 from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
@@ -18,30 +19,6 @@ from python_code.utils.hotelling_test_utils import run_hotelling_test
 conf = Config()
 ITERATIONS = 3
 EPOCHS = 250
-
-
-def prob_to_BPSK_symbol(p: torch.Tensor) -> torch.Tensor:
-    """
-    prob_to_symbol(x:PyTorch/Numpy Tensor/Array)
-    Converts Probabilities to BPSK Symbols by hard threshold: [0,0.5] -> '-1', [0.5,1] -> '+1'
-    :param p: probabilities vector
-    :return: symbols vector
-    """
-    return torch.sign(p - HALF)
-
-
-def prob_to_QPSK_symbol(p: torch.Tensor) -> torch.Tensor:
-    """
-    Converts Probabilities to QPSK Symbols by hard threshold.
-    first bit: [0,0.5] -> '+1',[0.5,1] -> '-1'
-    second bit: [0,0.5] -> '+1',[0.5,1] -> '-1'
-    """
-    p_real_neg = p[:, :, 0] + p[:, :, 2]
-    first_symbol = (-1) * torch.sign(p_real_neg - HALF)
-    p_img_neg = p[:, :, 1] + p[:, :, 2]
-    second_symbol = (-1) * torch.sign(p_img_neg - HALF)
-    s = torch.cat([first_symbol.unsqueeze(-1), second_symbol.unsqueeze(-1)], dim=-1)
-    return torch.view_as_complex(s)
 
 
 class DeepSICTrainer(Trainer):
@@ -73,7 +50,7 @@ class DeepSICTrainer(Trainer):
     def _initialize_probs_for_infer(self, rx):
         if conf.modulation_type == ModulationType.BPSK.name:
             probs_vec = HALF * torch.ones(rx.shape).to(DEVICE).float()
-        elif conf.modulation_type in [ModulationType.QPSK.name, ModulationType.EightPSK.name]:
+        elif conf.modulation_type in [ModulationType.QPSK.name, ModulationType.QAM16.name]:
             probs_vec = (1 / MODULATION_NUM_MAPPING[conf.modulation_type]) * torch.ones(rx.shape).to(DEVICE).unsqueeze(
                 -1)
             probs_vec = probs_vec.repeat([1, 1, MODULATION_NUM_MAPPING[conf.modulation_type] - 1]).float()
@@ -95,9 +72,11 @@ class DeepSICTrainer(Trainer):
     def preprocess(rx: torch.Tensor) -> torch.Tensor:
         if conf.modulation_type == ModulationType.BPSK.name:
             return rx.float()
-        elif conf.modulation_type in [ModulationType.QPSK.name]:
+        elif conf.modulation_type in [ModulationType.QPSK.name, ModulationType.QAM16.name]:
             y_input = torch.view_as_real(rx[:, :conf.n_ant]).float().reshape(rx.shape[0], -1)
             return torch.cat([y_input, rx[:, conf.n_ant:].float()], dim=1)
+        else:
+            raise ValueError("No such constellation type!")
 
     def train_model(self, single_model: nn.Module, tx: torch.Tensor, rx: torch.Tensor):
         """
@@ -116,7 +95,7 @@ class DeepSICTrainer(Trainer):
     def _initialize_probs_for_training(self, tx):
         if conf.modulation_type == ModulationType.BPSK.name:
             probs_vec = HALF * torch.ones(tx.shape).to(DEVICE)
-        elif conf.modulation_type in [ModulationType.QPSK.name, ModulationType.EightPSK.name]:
+        elif conf.modulation_type in [ModulationType.QPSK.name, ModulationType.QAM16.name]:
             probs_vec = (1 / MODULATION_NUM_MAPPING[conf.modulation_type]) * torch.ones(tx.shape).to(DEVICE).unsqueeze(
                 -1).repeat([1, 1, MODULATION_NUM_MAPPING[conf.modulation_type] - 1])
         else:
@@ -153,8 +132,8 @@ class DeepSICTrainer(Trainer):
             symbols_word = prob_to_BPSK_symbol(probs_vec.float())
         elif conf.modulation_type == ModulationType.QPSK.name:
             symbols_word = prob_to_QPSK_symbol(probs_vec.float())
-        # elif conf.modulation_type == ModulationType.EightPSK.name:
-        #     symbols_word = prob_to_EightPSK_symbol(probs_vec.float())
+        elif conf.modulation_type == ModulationType.QAM16.name:
+            symbols_word = prob_to_16QAM_symbol(probs_vec.float())
         else:
             raise ValueError("No such constellation!")
         detected_words = MODULATION_DICT[conf.modulation_type].demodulate(symbols_word)

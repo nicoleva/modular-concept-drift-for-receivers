@@ -17,12 +17,6 @@ conf = Config()
 
 DATA_GENERATION_SIZE = 1000
 
-def normalize_for_modulation(size: int) -> int:
-    """
-    Return the bits/symbols ratio for the given block size
-    """
-    return int(size // int(math.log2(MODULATION_NUM_MAPPING[conf.modulation_type])))
-
 class ChannelModelDataset(Dataset):
     """
     Dataset object for the channel. Used in training and evaluation.
@@ -47,7 +41,7 @@ class ChannelModelDataset(Dataset):
         h_full = np.empty((self.blocks_num, *self.channel_type.h_shape))
         rx_full = np.empty((self.blocks_num, self.block_length, self.channel_type.rx_length),
                            dtype=complex
-                           if conf.modulation_type in [ModulationType.QPSK.name]
+                           if conf.modulation_type in [ModulationType.QPSK.name,ModulationType.QAM16.name]
                            else float)
         for index in range(self.blocks_num):
             tx, h, rx = self.channel_type.get_vectors(snr, index)

@@ -10,7 +10,7 @@ from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChan
 from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMIMOChannel
 from python_code.channel.mimo_channels.one_user_distorted_mimo_channel import OneUserDistortedMIMOChannel
 from python_code.channel.mimo_channels.sed_channel import SEDChannel
-from python_code.channel.modulator import BPSKModulator, QPSKModulator
+from python_code.channel.modulator import BPSKModulator, QPSKModulator, MODULATION_DICT
 from python_code.utils.config_singleton import Config
 from python_code.utils.constants import ChannelModels, ModulationType
 
@@ -51,26 +51,16 @@ class MIMOChannel:
         self.h_shape = [N_ANT, N_USER]
         self.rx_length = N_ANT
         self.h = MIMO_CHANNELS_DICT[conf.channel_model]()
+        self.modulator = MODULATION_DICT[conf.modulation_type]
 
     def _transmit(self, h: np.ndarray, snr: float) -> Tuple[np.ndarray, np.ndarray]:
-        if conf.modulation_type == ModulationType.BPSK.name:
-            tx_pilots = self._bits_generator.integers(0, BPSKModulator.constellation_size,
-                                                      size=(self._pilots_length, N_USER))
-            tx_data = self._bits_generator.integers(0, BPSKModulator.constellation_size,
-                                                    size=(self._block_length - self._pilots_length, N_USER))
-            tx = np.concatenate([tx_pilots, tx_data])
-            # modulation
-            s = BPSKModulator.modulate(tx.T)
-        elif conf.modulation_type == ModulationType.QPSK.name:
-            tx_pilots = self._bits_generator.integers(0, QPSKModulator.constellation_size,
-                                                      size=(self._pilots_length, N_USER))
-            tx_data = self._bits_generator.integers(0, QPSKModulator.constellation_size,
-                                                    size=(self._block_length - self._pilots_length, N_USER))
-            tx = np.concatenate([tx_pilots, tx_data])
-            # modulation
-            s = QPSKModulator.modulate(tx.T)
-        else:
-            raise Exception("Do not support other constellation")
+        tx_pilots = self._bits_generator.integers(0, self.modulator.constellation_size,
+                                                  size=(self._pilots_length, N_USER))
+        tx_data = self._bits_generator.integers(0, self.modulator.constellation_size,
+                                                size=(self._block_length - self._pilots_length, N_USER))
+        tx = np.concatenate([tx_pilots, tx_data])
+        # modulation
+        s = self.modulator.modulate(tx.T)
         # pass through channel
         rx = MIMO_CHANNELS_DICT[conf.channel_model].transmit(s=s, h=h, snr=snr)
         return tx, rx.T
