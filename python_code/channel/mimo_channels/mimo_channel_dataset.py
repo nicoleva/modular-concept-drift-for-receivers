@@ -6,9 +6,9 @@ from matplotlib import pyplot as plt
 from numpy.random import default_rng
 
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
+from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel, Cost2100MIMOChannel2nd
 from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMIMOChannel
 from python_code.channel.mimo_channels.one_user_distorted_mimo_channel import OneUserDistortedMIMOChannel
-from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel, Cost2100MIMOChannel2nd
 from python_code.channel.mimo_channels.sed_channel import SEDChannel
 from python_code.channel.modulator import BPSKModulator, QPSKModulator
 from python_code.utils.config_singleton import Config
@@ -32,12 +32,15 @@ conf = Config()
 
 MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel,
                       ChannelModels.SEDChannel.name: SEDChannel,
-                      ChannelModels.OneUserDistortedMIMOChannel.name:OneUserDistortedMIMOChannel,
+                      ChannelModels.OneUserDistortedMIMOChannel.name: OneUserDistortedMIMOChannel,
                       ChannelModels.Cost2100.name: Cost2100MIMOChannel,
                       ChannelModels.Cost21002nd.name: Cost2100MIMOChannel2nd
                       }
+
+
 def get_qpsk_symbols_from_bits(b: np.ndarray) -> np.ndarray:
     return b[::2] + 2 * b[1::2]
+
 
 class MIMOChannel:
     def __init__(self, block_length: int, pilots_length: int):
@@ -66,9 +69,8 @@ class MIMOChannel:
             tx = np.concatenate([tx_pilots, tx_data])
             # modulation
             s = QPSKModulator.modulate(tx.T)
-            tx = get_qpsk_symbols_from_bits(tx)
         else:
-            raise Exception ("Do not support other constellation")
+            raise Exception("Do not support other constellation")
         # pass through channel
         rx = MIMO_CHANNELS_DICT[conf.channel_model].transmit(s=s, h=h, snr=snr)
         return tx, rx.T

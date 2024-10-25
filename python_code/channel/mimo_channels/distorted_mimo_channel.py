@@ -2,11 +2,13 @@ import numpy as np
 
 from python_code.channel.channels_hyperparams import N_ANT
 from python_code.utils.config_singleton import Config
+from python_code.utils.constants import ModulationType
 
 conf = Config()
 
 CHANNEL_FLIPS_EVERY = {0: 7, 1: 18, 2: 22, 3: 28}
 C = 2
+
 
 class DistortedMIMOChannel:
     def __init__(self):
@@ -33,7 +35,12 @@ class DistortedMIMOChannel:
         """
         conv = DistortedMIMOChannel._compute_channel_signal_convolution(h, s)
         sigma = 10 ** (-0.1 * snr)
-        w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
+        if conf.modulation_type == ModulationType.BPSK.name:
+            w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
+        else:
+            w_real = np.sqrt(sigma) / 2 * np.random.randn(N_ANT, s.shape[1])
+            w_imag = np.sqrt(sigma) / 2 * np.random.randn(N_ANT, s.shape[1]) * 1j
+            w = w_real + w_imag
         y = conv + w
         return y
 

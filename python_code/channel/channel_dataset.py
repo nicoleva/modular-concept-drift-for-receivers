@@ -43,9 +43,9 @@ class ChannelModelDataset(Dataset):
     def get_snr_data(self, snr: float, database: list):
         if database is None:
             database = []
-        tx_full = np.empty((self.blocks_num, int(normalize_for_modulation(self.block_length)), self.channel_type.tx_length))
+        tx_full = np.empty((self.blocks_num, self.block_length, self.channel_type.tx_length))
         h_full = np.empty((self.blocks_num, *self.channel_type.h_shape))
-        rx_full = np.empty((self.blocks_num, int(normalize_for_modulation(self.block_length)), self.channel_type.rx_length),
+        rx_full = np.empty((self.blocks_num, self.block_length, self.channel_type.rx_length),
                            dtype=complex
                            if conf.modulation_type in [ModulationType.QPSK.name]
                            else float)
