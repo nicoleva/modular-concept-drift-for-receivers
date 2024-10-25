@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 
+from python_code import DEVICE
 from python_code.utils.constants import HALF
 
 
@@ -34,8 +35,8 @@ class QPSKModulator:
     # Define the QPSK constellation mapping
     SYMBOLS = {
         0: (1 / np.sqrt(2)) + (1 / np.sqrt(2)) * 1j,
-        1: (1 / np.sqrt(2)) - (1 / np.sqrt(2)) * 1j,
-        2: -(1 / np.sqrt(2)) + (1 / np.sqrt(2)) * 1j,
+        1: -(1 / np.sqrt(2)) + (1 / np.sqrt(2)) * 1j,
+        2: (1 / np.sqrt(2)) - (1 / np.sqrt(2)) * 1j,
         3: -(1 / np.sqrt(2)) - (1 / np.sqrt(2)) * 1j
     }
 
@@ -51,22 +52,19 @@ class QPSKModulator:
         return modulated_signal
 
     @staticmethod
-    def demodulate(s: np.ndarray) -> np.ndarray:
+    def demodulate(s: torch.Tensor) -> torch.Tensor:
         """
         QPSK demodulation using inverse mapping
-        :param s: modulated signal array of shape (n_user, batch_size) with complex symbols
+        :param s: modulated signal tensor of shape (n_user, batch_size) with complex symbols
         :return: demodulated matrix of shape (n_user, batch_size) with integer values (0, 1, 2, 3)
         """
-        # Create an array of constellation points for vectorized distance calculation
-        constellation_points = np.array(list(QPSKModulator.SYMBOLS.values()))
-
-        # Calculate distance from each point in s to each constellation point
-        distances = np.abs(s[:, :, np.newaxis] - constellation_points)
-
-        # Find the index of the nearest constellation point
-        demodulated = np.argmin(distances, axis=2)
+        # Define reverse mapping based on distance to constellation points
+        symbols = torch.tensor(list(QPSKModulator.SYMBOLS.values()), dtype=torch.complex64).to(DEVICE)
+        distances = torch.abs(s.unsqueeze(-1) - symbols)
+        demodulated = torch.argmin(distances, dim=-1)
 
         return demodulated
+
 
 class EightPSKModulator:
     constellation_size = 8
@@ -114,9 +112,4 @@ MODULATION_NUM_MAPPING = {
     'BPSK': 2,
     'QPSK': 4,
     'EightPSK': 8
-}
-
-MODULATION_BASE_SIZE_MAPPING = {
-    'BPSK': 32,
-    'QPSK': 16,
 }
