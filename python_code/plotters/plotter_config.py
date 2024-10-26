@@ -30,6 +30,7 @@ class PlotType(Enum):
     MultiDistortedMIMODNN = 'MultiDistortedMIMODNN'
     CostMIMODeepSICQAM16 = 'CostMIMODeepSICQAM16'
 
+
 def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
     drift_detection_methods = None
     if label_name == PlotType.SingleUserDistortedMIMODeepSIC.name:
@@ -122,7 +123,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.model.name,
              'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name,'fading_in_channel': False,
+             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
              'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
              'modular': False, 'drift_detection_method_hp': None}
         ]
@@ -149,9 +150,9 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.model.name, 'modulation_type': 'QPSK',
              'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name,'fading_in_channel': False,
+             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
              'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
-             'modular': False, 'drift_detection_method_hp': None,}
+             'modular': False, 'drift_detection_method_hp': None, }
         ]
         drift_detection_methods = [
             {'drift_detection_method': 'DDM',
@@ -173,9 +174,9 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 16, 'detector_type': DetectorType.model.name, 'modulation_type': 'QAM16',
              'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name,'fading_in_channel': False,
+             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
              'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
-             'modular': False, 'drift_detection_method_hp': None,}
+             'modular': False, 'drift_detection_method_hp': None}
         ]
         drift_detection_methods = [
             {'drift_detection_method': 'DDM',
@@ -224,7 +225,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.black_box.name,
              'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
-             'channel_model': ChannelModels.Cost21002nd.name,'fading_in_channel': False,
+             'channel_model': ChannelModels.Cost21002nd.name, 'fading_in_channel': False,
              'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
              'modular': False, 'drift_detection_method_hp': None}
         ]
@@ -383,7 +384,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
     elif label_name == PlotType.SOFT_SER_BLOCK_LINEAR_COST.name:
         methods_list = [
             'PERIODIC',
-            #'ALWAYS',
+            # 'ALWAYS',
             'DRIFT',
         ]
         params_dicts = [
@@ -426,7 +427,7 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         ]
         drift_detection_methods = [
             {'drift_detection_method': 'DDM',
-             'drift_detection_method_hp': {'alpha_ddm': 3.5, 'beta_ddm': 0.2}, # 4;0.2
+             'drift_detection_method_hp': {'alpha_ddm': 3.5, 'beta_ddm': 0.2},  # 4;0.2
              },
             {'drift_detection_method': 'PHT',
              'drift_detection_method_hp': {'beta_pht': 0.7, 'delta_pht': 1.3, 'lambda_pht': 0.02},
@@ -473,15 +474,15 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
             {'snr': 11, 'detector_type': DetectorType.model.name, 'channel_type': ChannelModes.SISO.name,
              'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
              'block_length': 9500, 'pilot_size': 500, 'drift_detection_method': None,
-             'fading_in_channel': True, 'from_scratch': False, 'modular': False,},
+             'fading_in_channel': True, 'from_scratch': False, 'modular': False, },
             {'snr': 12, 'detector_type': DetectorType.model.name, 'channel_type': ChannelModes.SISO.name,
              'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
              'block_length': 9500, 'pilot_size': 500, 'drift_detection_method': None,
-             'fading_in_channel': True, 'from_scratch': False, 'modular': False,},
+             'fading_in_channel': True, 'from_scratch': False, 'modular': False, },
             {'snr': 13, 'detector_type': DetectorType.model.name, 'channel_type': ChannelModes.SISO.name,
              'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
              'block_length': 9500, 'pilot_size': 500, 'drift_detection_method': None,
-             'fading_in_channel': True, 'from_scratch': False, 'modular': False,},
+             'fading_in_channel': True, 'from_scratch': False, 'modular': False, },
         ]
         methods_list = [
             'PERIODIC',
@@ -512,15 +513,15 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
             {'snr': 11, 'detector_type': DetectorType.black_box.name, 'channel_type': ChannelModes.SISO.name,
              'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
              'block_length': 9000, 'pilot_size': 1000, 'drift_detection_method': None,
-             'fading_in_channel': True, 'from_scratch': False, 'modular': False,},
+             'fading_in_channel': True, 'from_scratch': False, 'modular': False, },
             {'snr': 12, 'detector_type': DetectorType.black_box.name, 'channel_type': ChannelModes.SISO.name,
              'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
              'block_length': 9000, 'pilot_size': 1000, 'drift_detection_method': None,
-             'fading_in_channel': True, 'from_scratch': False, 'modular': False,},
+             'fading_in_channel': True, 'from_scratch': False, 'modular': False, },
             {'snr': 13, 'detector_type': DetectorType.black_box.name, 'channel_type': ChannelModes.SISO.name,
              'blocks_num': 100, 'channel_model': ChannelModels.Cost2100.name,
              'block_length': 9000, 'pilot_size': 1000, 'drift_detection_method': None,
-             'fading_in_channel': True, 'from_scratch': False, 'modular': False,},
+             'fading_in_channel': True, 'from_scratch': False, 'modular': False, },
         ]
         methods_list = [
             'PERIODIC',
@@ -680,8 +681,8 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
         plot_type = 'plot_by_snrs'
     elif label_name == PlotType.CostMIMODNNSNR.name:
         methods_list = [
-            #'PERIODIC',
-            #'ALWAYS',
+            # 'PERIODIC',
+            # 'ALWAYS',
             'DRIFT',
         ]
         params_dicts = [
