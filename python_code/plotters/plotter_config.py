@@ -28,6 +28,7 @@ class PlotType(Enum):
     MultiDistortedMIMODeepSIC = 'MultiDistortedMIMODeepSIC'
     ModularMultiDistortedMIMODeepSIC = 'ModularMultiDistortedMIMODeepSIC'
     MultiDistortedMIMODNN = 'MultiDistortedMIMODNN'
+    CostMIMODeepSICQAM16 = 'CostMIMODeepSICQAM16'
 
 def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
     drift_detection_methods = None
@@ -142,8 +143,8 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
     elif label_name == PlotType.CostMIMODeepSICQPSK.name:
         methods_list = [
             'PERIODIC',
-            #'ALWAYS',
-            #'DRIFT',
+            'ALWAYS',
+            'DRIFT',
         ]
         params_dicts = [
             {'snr': 12, 'detector_type': DetectorType.model.name, 'modulation_type': 'QPSK',
@@ -156,9 +157,30 @@ def get_config(label_name: str) -> Tuple[List[Dict], list, list, str, str, str]:
             {'drift_detection_method': 'DDM',
              'drift_detection_method_hp': {'alpha_ddm': 7.5, 'beta_ddm': 0.2},
              },
-            # {'drift_detection_method': 'PHT',
-            #  'drift_detection_method_hp': {'beta_pht': 0.9, 'delta_pht': 1, 'lambda_pht': 0.08},
-            #  },
+            {'drift_detection_method': 'HT',
+             'drift_detection_method_hp': {'ht_threshold': 0.015},
+             },
+        ]
+        values = list(range(100))
+        xlabel, ylabel = 'block_index', 'BER'
+        plot_type = 'plot_ber_aggregated'
+    elif label_name == PlotType.CostMIMODeepSICQAM16.name:
+        methods_list = [
+            'PERIODIC',
+            'ALWAYS',
+            'DRIFT',
+        ]
+        params_dicts = [
+            {'snr': 16, 'detector_type': DetectorType.model.name, 'modulation_type': 'QAM16',
+             'channel_type': ChannelModes.MIMO.name, 'blocks_num': 100,
+             'channel_model': ChannelModels.Cost21002nd.name,'fading_in_channel': False,
+             'block_length': 7000, 'pilot_size': 2000, 'drift_detection_method': None,
+             'modular': False, 'drift_detection_method_hp': None,}
+        ]
+        drift_detection_methods = [
+            {'drift_detection_method': 'DDM',
+             'drift_detection_method_hp': {'alpha_ddm': 7.5, 'beta_ddm': 0.2},
+             },
             {'drift_detection_method': 'HT',
              'drift_detection_method_hp': {'ht_threshold': 0.015},
              },

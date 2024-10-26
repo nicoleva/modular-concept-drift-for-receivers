@@ -7,8 +7,7 @@ from torch import nn
 
 from python_code import DEVICE
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
-from python_code.channel.modulator import MODULATION_NUM_MAPPING, MODULATION_DICT, prob_to_BPSK_symbol, \
-    prob_to_QPSK_symbol, prob_to_16QAM_symbol
+from python_code.channel.modulator import MODULATION_NUM_MAPPING, MODULATION_DICT, prob_to_BPSK_symbol
 from python_code.detectors.deepsic.deep_sic_detector import DeepSICDetector
 from python_code.detectors.trainer import Trainer
 from python_code.drift_mechanisms.drift_mechanism_wrapper import TRAINING_TYPES
@@ -130,13 +129,13 @@ class DeepSICTrainer(Trainer):
     def compute_output(self, probs_vec):
         if conf.modulation_type == ModulationType.BPSK.name:
             symbols_word = prob_to_BPSK_symbol(probs_vec.float())
-        elif conf.modulation_type == ModulationType.QPSK.name:
-            symbols_word = prob_to_QPSK_symbol(probs_vec.float())
-        elif conf.modulation_type == ModulationType.QAM16.name:
-            symbols_word = prob_to_16QAM_symbol(probs_vec.float())
+            detected_words = MODULATION_DICT[conf.modulation_type].demodulate(symbols_word)
+        elif conf.modulation_type in [ModulationType.QPSK.name, ModulationType.QAM16.name]:
+            first_user_probs = 1 - torch.sum(probs_vec, dim=2).unsqueeze(-1)
+            all_probs = torch.cat([first_user_probs, probs_vec], dim=2)
+            detected_words = torch.argmax(all_probs, dim=2)
         else:
             raise ValueError("No such constellation!")
-        detected_words = MODULATION_DICT[conf.modulation_type].demodulate(symbols_word)
         return detected_words
 
     def forward(self, rx: torch.Tensor) -> torch.Tensor:
@@ -174,7 +173,7 @@ class DeepSICTrainer(Trainer):
             preprocessed_input = self.preprocess(input)
             with torch.no_grad():
                 output = self.softmax(model[user][i - 1](preprocessed_input))
-            next_probs_vec[:, user] = output[:, 1:].reshape(next_probs_vec[:, user].shape)
+            next_probs_vec[:, user] = output[:, 1:]
         return next_probs_vec
 
     def forward_pilot(self, rx: torch.Tensor, tx: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -200,11 +199,12 @@ class DeepSICTrainer(Trainer):
                     # Higher order modulation case - extract the symbolwise probs vector from the total probs vector
                     # if it is the last symbol in the constellation - its probs is 1 - (all other probs)
                     else:
-                        if symbol == constellation_size - 1:
+                        # first symbol takes its prob as 1 - all other probs
+                        if symbol == 0:
                             all_other_probs = np.sum(self.pilots_probs_vec[rx_symbol_idx, user].cpu().numpy(), axis=1)
                             ht_t_0[symbol][user][i] = 1 - all_other_probs
                         else:
-                            ht_t_0[symbol][user][i] = self.pilots_probs_vec[rx_symbol_idx, user, symbol].cpu().numpy()
+                            ht_t_0[symbol][user][i] = self.pilots_probs_vec[rx_symbol_idx, user, symbol - 1].cpu().numpy()
 
                 # Run hypothesis testing if previous distributions are available
                 if np.shape(self.prev_ht[0][user][i])[0] != 0:
