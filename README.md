@@ -115,3 +115,16 @@ This code was simulated with GeForce RTX 2060 with driver version 432.00 and CUD
 11. Click OK
 
 12. Done!
+
+## Lambda Parameters for the Experiments
+| **Detectors**           | **Scenarios**            | **DDM** | **PHT** | **HT**      |
+|-------------------------|--------------------------|---------|---------|-------------|
+| **ViterbiNet**          | COST2100                 | 3.5     | 0.02    | ×           |
+| **RNN**                 | COST2100                 | 3       | 0.02    | ×           |
+| **DeepSIC / Modular**   | Single User Variations   | 5/5     | 0.15/0.15 | 0.005/0.005 |
+| **DeepSIC / Modular**   | Multi-User Variations    | 30/8    | ×       | 0.5/0.05    |
+| **DeepSIC / Modular**   | COST2100                 | 7.5/2   | ×       | 0.015/0.003 |
+| **DNN**                 | Single User Variations   | 5       | 0.15    | 0.01        |
+| **DNN**                 | Multi-User Variations    | 35      | ×       | 0.7         |
+| **DNN**                 | COST2100                 | 7.5     | ×       | 0.07        |
+
