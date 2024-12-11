@@ -10,7 +10,7 @@ from python_code.utils.trellis_utils import calculate_mimo_states, calculate_sym
 
 conf = Config()
 
-EPOCHS = 400
+EPOCHS = 700
 
 HT_s0_t_0 = [[] for _ in range(N_USER)]
 prev_ht_s0 = [[] for _ in range(N_USER)]

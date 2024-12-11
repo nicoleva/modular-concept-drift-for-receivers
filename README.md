@@ -10,6 +10,20 @@ Python repository for the paper "Concept Drift Detection for Deep Receivers".
 
 Please cite our [paper](https://arxiv.org/), if the code is used for publishing research.
 
+The threshold λ parameter is chosen as in the next table.
+
+| **Detectors**           | **Scenarios**            | **DDM** | **PHT** | **HT**      |
+|-------------------------|--------------------------|---------|---------|-------------|
+| **ViterbiNet**          | COST2100                 | 3.5     | 0.02    | ×           |
+| **RNN**                 | COST2100                 | 3       | 0.02    | ×           |
+| **DeepSIC / Modular**   | Single User Variations   | 5/5     | 0.15/0.15 | 0.005/0.005 |
+| **DeepSIC / Modular**   | Multi-User Variations    | 30/8    | ×       | 0.5/0.05    |
+| **DeepSIC / Modular**   | COST2100                 | 7.5/2   | ×       | 0.015/0.003 |
+| **DNN**                 | Single User Variations   | 5       | 0.15    | 0.01        |
+| **DNN**                 | Multi-User Variations    | 35      | ×       | 0.7         |
+| **DNN**                 | COST2100                 | 7.5     | ×       | 0.07        |
+
+
 # Table of Contents
 
 - [Introduction](#introduction)

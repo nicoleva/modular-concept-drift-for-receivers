@@ -1,8 +1,11 @@
 # channel
 channel_type: 'MIMO' # Channel mechanism_type values: ['SISO','MIMO'].
 channel_model: 'OneUserDistortedMIMOChannel' # Physical channel models: ['DistortedMIMO','SEDChannel','OneUserDistortedMIMOChannel']
-detector_type: 'model' # 'model' or 'black_box'
+detector_type: 'black_box' # 'model' or 'black_box'
 snr: 12 # validation SNR value. values: float.
+modulation_type: 'QAM16' # 'BPSK', 'QPSK', 'QAM16'
+n_user: 4 # number of transmitting devices
+n_ant: 4 # number of received signals
 
 # protocol
 block_length: 7000 # coherence block time, total size of pilot + data. values: int.
@@ -18,7 +21,7 @@ seed: 100 # run seed
 mechanism: DRIFT # ['ALWAYS','DRIFT','PERIODIC']
 modular: True
 period: 20
-drift_detection_method: 'DDM' # ['DDM','PHT','HT','PST']
+drift_detection_method: 'HT' # ['DDM','PHT','HT','PST']
 drift_detection_method_hp: { 'alpha_ddm': 5, 'beta_ddm': 0.2,
                              'beta_pht': 0.2, 'delta_pht': 1, 'lambda_pht': 0.1,
                              'ht_threshold': 0.005, 'posterior_threshold': 0.9 }

@@ -141,9 +141,10 @@ class Trainer(object):
                     conf.channel_type == ChannelModes.MIMO.name and \
                     conf.detector_type == DetectorType.model.name:
                 # modular per-user training
-                self.modular_training(block_idn_train, block_ind, tx_pilot, rx_pilot, drift_mechanism, conf.period, kwargs)
+                self.modular_training(block_idn_train, block_ind, tx_pilot, rx_pilot, drift_mechanism, conf.period,
+                                      kwargs)
             elif drift_mechanism.is_train(kwargs):
-                self.reg_training(block_idn_train, block_ind, rx_pilot, tx_pilot, conf.period,)
+                self.reg_training(block_idn_train, block_ind, rx_pilot, tx_pilot, conf.period, )
             # detect data part after training on the pilot part
             detected_word = self.forward(rx_data)
             # calculate accuracy
@@ -156,8 +157,9 @@ class Trainer(object):
                           'tx_pilot': tx_pilot,
                           'probs_vec': probs_vec}
             else:
-                kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht, 'tx_pilot': tx_pilot,
-                      'probs_vec': probs_vec}
+                kwargs = {'block_ind': block_ind, 'error_rate': error_rate, 'rx': rx, 'ht': self.ht,
+                          'tx_pilot': tx_pilot,
+                          'probs_vec': probs_vec}
             total_ber.append(ber)
 
         print(f'Final ser: {sum(total_ber) / len(total_ber)}, Total Re-trains: {sum(block_idn_train)}')

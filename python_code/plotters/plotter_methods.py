@@ -27,12 +27,23 @@ def set_method_name(conf: Config, method_name: str, params_dict: Dict[str, Union
     """
     name = ''
     for field, value in params_dict.items():
-        conf.set_value(field, value)
         if field == 'drift_detection_method_hp':
             continue  # dont include hp in file name, otherwise the file name is too long
         name += f'_{field}_{value}'
     conf.set_value('run_name', method_name + name)
     return name
+
+def set_conf_values(conf: Config, params_dict: Dict[str, Union[int, str]]) -> str:
+    """
+    Set values of params dict to current config. And return the field and their respective values as the name of the run,
+    used to save as pkl file for easy access later.
+    :param conf: config file.
+    :param method_name: the desired augmentation scheme name
+    :param params_dict: the run params
+    :return: name of the run
+    """
+    for field, value in params_dict.items():
+        conf.set_value(field, value)
 
 
 def add_ser(all_curves: List[Tuple[List[float], str]], conf: Config, method_name: str, name: str, run_over: bool,
@@ -58,6 +69,7 @@ def compute_ser_for_method(all_curves: List[Tuple[float, str]], method: str, par
                            run_params_obj: RunParams):
     conf = Config()
     conf.load_config(os.path.join(CONFIG_RUNS_DIR, params_dict['channel_type'], f'{method}.yaml'))
+    set_conf_values(conf, params_dict)
     trainer = CHANNEL_TYPE_TO_TRAINER_DICT[params_dict['channel_type']][params_dict['detector_type']]()
     full_method_name = f'{trainer.__str__()} - {method}'
     print(full_method_name)

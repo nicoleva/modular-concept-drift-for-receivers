@@ -6,12 +6,13 @@ import scipy.io
 from dir_definitions import MIMO_COST2100_DIR
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
 from python_code.utils.config_singleton import Config
-from python_code.utils.constants import HALF
+from python_code.utils.constants import HALF, ModulationType
 
 conf = Config()
 
 MAX_FRAMES = 25
-gain = {1:0.75, 2:0.5, 3:0.5, 4:0.25}
+gain = {1: 0.75, 2: 0.5, 3: 0.5, 4: 0.25}
+
 
 class Cost2100MIMOChannel:
     @staticmethod
@@ -37,7 +38,12 @@ class Cost2100MIMOChannel:
         """
         conv = Cost2100MIMOChannel._compute_channel_signal_convolution(h, s)
         sigma = 10 ** (-0.1 * snr)
-        w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
+        if conf.modulation_type == ModulationType.BPSK.name:
+            w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
+        else:
+            w_real = np.sqrt(sigma) / 2 * np.random.randn(N_ANT, s.shape[1])
+            w_imag = np.sqrt(sigma) / 2 * np.random.randn(N_ANT, s.shape[1]) * 1j
+            w = w_real + w_imag
         y = conv + w
         return y
 
@@ -45,6 +51,7 @@ class Cost2100MIMOChannel:
     def _compute_channel_signal_convolution(h: np.ndarray, s: np.ndarray) -> np.ndarray:
         conv = np.matmul(h, s)
         return conv
+
 
 class Cost2100MIMOChannel2nd:
     @staticmethod
@@ -55,7 +62,7 @@ class Cost2100MIMOChannel2nd:
         for i in range(1, n_user + 1):
             h_user = []
             for ant in range(1, n_user + 1):
-                los = ant #if frame_ind > 51 else (ant+0)%n_user + 1
+                los = ant  # if frame_ind > 51 else (ant+0)%n_user + 1
                 path_to_mat = os.path.join(MIMO_COST2100_DIR, f'{main_folder}', f'h_user_{i}_ant_{ant}{room}.mat')
                 h_user_ant = np.squeeze(np.array(scipy.io.loadmat(path_to_mat)['out']))
                 h_user_ant = h_user_ant[::1]
@@ -63,23 +70,23 @@ class Cost2100MIMOChannel2nd:
                 #     h_user_ant = h_user_ant + 10
                 # else:
                 #     h_user_ant = h_user_ant - 5 - los
-                h_user_ant = np.array([10**(h/10) for h in h_user_ant])
+                h_user_ant = np.array([10 ** (h / 10) for h in h_user_ant])
                 max_val = h_user_ant.max()
-                if (i == los): # antenna pointing at user
+                if (i == los):  # antenna pointing at user
                     h_user_ant = np.array(h_user_ant) / max_val
                     # if i == 3 and (frame_ind <33 or frame_ind >66):
                     #     h_user_ant = np.array(h_user_ant)/ max_val + 0.8
                     # else:
                     #     h_user_ant = np.array(h_user_ant) / max_val
                 else:
-                    h_user_ant = np.array(h_user_ant)*0.33/max_val
-                h_user_ant = [i if i<1 else 1 for i in h_user_ant]
+                    h_user_ant = np.array(h_user_ant) * 0.33 / max_val
+                h_user_ant = [i if i < 1 else 1 for i in h_user_ant]
                 h_user.append(h_user_ant)
 
-            total_h[i - 1] = np.squeeze(np.array(h_user))[:, frame_ind%33]
-            #total_h[i - 1] = np.squeeze(np.array(h_user))[:,frame_ind]
+            total_h[i - 1] = np.squeeze(np.array(h_user))[:, frame_ind % 33]
+            # total_h[i - 1] = np.squeeze(np.array(h_user))[:,frame_ind]
 
-        #total_h[np.arange(n_user), np.arange(n_user)] = 1
+        # total_h[np.arange(n_user), np.arange(n_user)] = 1
         return total_h
 
     @staticmethod
@@ -93,7 +100,12 @@ class Cost2100MIMOChannel2nd:
         """
         conv = Cost2100MIMOChannel._compute_channel_signal_convolution(h, s)
         sigma = 10 ** (-0.1 * snr)
-        w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
+        if conf.modulation_type == ModulationType.BPSK.name:
+            w = np.sqrt(sigma) * np.random.randn(N_ANT, s.shape[1])
+        else:
+            w_real = np.sqrt(sigma) / 2 * np.random.randn(N_ANT, s.shape[1])
+            w_imag = np.sqrt(sigma) / 2 * np.random.randn(N_ANT, s.shape[1]) * 1j
+            w = w_real + w_imag
         y = conv + w
         return y
 

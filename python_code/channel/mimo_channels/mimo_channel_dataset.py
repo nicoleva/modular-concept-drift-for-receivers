@@ -6,13 +6,13 @@ from matplotlib import pyplot as plt
 from numpy.random import default_rng
 
 from python_code.channel.channels_hyperparams import N_ANT, N_USER
+from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel, Cost2100MIMOChannel2nd
 from python_code.channel.mimo_channels.distorted_mimo_channel import DistortedMIMOChannel
 from python_code.channel.mimo_channels.one_user_distorted_mimo_channel import OneUserDistortedMIMOChannel
-from python_code.channel.mimo_channels.cost_mimo_channel import Cost2100MIMOChannel, Cost2100MIMOChannel2nd
 from python_code.channel.mimo_channels.sed_channel import SEDChannel
-from python_code.channel.modulator import BPSKModulator
+from python_code.channel.modulator import BPSKModulator, QPSKModulator, MODULATION_DICT
 from python_code.utils.config_singleton import Config
-from python_code.utils.constants import ChannelModels
+from python_code.utils.constants import ChannelModels, ModulationType
 
 R = 9 / 6.45
 
@@ -32,10 +32,14 @@ conf = Config()
 
 MIMO_CHANNELS_DICT = {ChannelModels.DistortedMIMO.name: DistortedMIMOChannel,
                       ChannelModels.SEDChannel.name: SEDChannel,
-                      ChannelModels.OneUserDistortedMIMOChannel.name:OneUserDistortedMIMOChannel,
+                      ChannelModels.OneUserDistortedMIMOChannel.name: OneUserDistortedMIMOChannel,
                       ChannelModels.Cost2100.name: Cost2100MIMOChannel,
                       ChannelModels.Cost21002nd.name: Cost2100MIMOChannel2nd
                       }
+
+
+def get_qpsk_symbols_from_bits(b: np.ndarray) -> np.ndarray:
+    return b[::2] + 2 * b[1::2]
 
 
 class MIMOChannel:
@@ -47,15 +51,16 @@ class MIMOChannel:
         self.h_shape = [N_ANT, N_USER]
         self.rx_length = N_ANT
         self.h = MIMO_CHANNELS_DICT[conf.channel_model]()
+        self.modulator = MODULATION_DICT[conf.modulation_type]
 
     def _transmit(self, h: np.ndarray, snr: float) -> Tuple[np.ndarray, np.ndarray]:
-        tx_pilots = self._bits_generator.integers(0, BPSKModulator.constellation_size,
+        tx_pilots = self._bits_generator.integers(0, self.modulator.constellation_size,
                                                   size=(self._pilots_length, N_USER))
-        tx_data = self._bits_generator.integers(0, BPSKModulator.constellation_size,
+        tx_data = self._bits_generator.integers(0, self.modulator.constellation_size,
                                                 size=(self._block_length - self._pilots_length, N_USER))
         tx = np.concatenate([tx_pilots, tx_data])
         # modulation
-        s = BPSKModulator.modulate(tx.T)
+        s = self.modulator.modulate(tx.T)
         # pass through channel
         rx = MIMO_CHANNELS_DICT[conf.channel_model].transmit(s=s, h=h, snr=snr)
         return tx, rx.T
